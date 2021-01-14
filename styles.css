@@ -1,0 +1,17 @@
+.nav-button {
+    border-right: solid 2px #3b3b3b !important;
+    border-left: solid 2px #3b3b3b !important;
+    border-bottom: solid 2px #3b3b3b !important;
+    border-radius: 1px;
+}
+
+.nav-button-inactive {
+    background-color: #1a1e21 !important;
+    border-bottom: hidden !important;
+    border-top: solid 2px #3b3b3b !important;
+}
+
+.scrollable {
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+}

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Siteblock</title>
+</head>
+<body class="bg-dark text-white mb-2" style="width: 400px; height: 500px">
+    <div class="container">
+        <h6 class="mt-2">Siteblock</h6>
+        <div id="tabSites" style="height: 430px" class="scrollable">
+            <div class="row px-2 py-2">
+                <input id="newSite" placeholder="New Site" class="col-10">
+                <button class="btn btn-transparent col-2 text-primary" id="addSiteButton" type="submit">
+                    <i class="fa fa-plus"></i>
+                </button>
+            </div>
+            <table id="sitesTable" class="table table-dark table-striped"></table>
+        </div>
+        <div id="tabReddit" style="height: 430px" class="scrollable" hidden>
+            <div class="row px-2 py-2">
+                <input id="newReddit" placeholder="New Site" class="col-10">
+                <button class="btn btn-transparent col-2 text-primary" id="addRedditButton" type="submit">
+                    <i class="fa fa-plus"></i>
+                </button>
+            </div>
+            <table id="redditTable" class="table table-dark table-striped"></table>
+        </div>
+        <div class="d-flex justify-content-between">
+            <button class="btn btn-transparent text-white w-100 nav-button" id="sitesToggle" disabled>Sites</button>
+            <button class="btn btn-transparent text-white w-100 nav-button nav-button-inactive" id="redditToggle">Reddit</button>
+        </div>
+    </div>
+</body>
+<link href="fontawesome-free-5.15.1-web/css/all.min.css" rel="stylesheet">
+<link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+<link href="styles.css" rel="stylesheet">
+<script src="bootstrap/js/bootstrap.min.js"></script>
+<script src="popup.js"></script>
+</html>

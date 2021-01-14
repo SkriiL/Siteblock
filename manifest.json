@@ -1,0 +1,25 @@
+{
+  "name": "Siteblock",
+  "version": "1.0",
+  "permissions": ["storage", "declarativeContent", "activeTab", "tabs"],
+  "background": {
+    "scripts": ["background.js"],
+    "persistent": false
+  },
+  "browser_action": {
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "js": ["content.js"],
+      "matches": ["http://*/*", "https://*/*"],
+      "css": ["styles.css"]
+    },
+    {
+      "js": ["content-reddit.js"],
+      "matches": ["http://reddit.com/*", "https://reddit.com/*", "http://www.reddit.com/*", "https://www.reddit.com/*"],
+      "css": ["styles.css"]
+    }
+  ],
+  "manifest_version": 2
+}
