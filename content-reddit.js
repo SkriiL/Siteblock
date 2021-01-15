@@ -1,8 +1,8 @@
-chrome.runtime.sendMessage({ getReddits: true }, function (response) {
+chrome.runtime.sendMessage({ getSites: true }, function (response) {
     if ( response.error != null ) {
         console.error(response.error);
-    } else if ( response.reddits != null ) {
-        isBlocked(response.reddits);
+    } else if ( response.sites != null ) {
+        isBlocked(response.sites.filter(site => site.isReddit));
     }
 });
 

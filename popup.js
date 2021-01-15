@@ -26,26 +26,32 @@ function createIconButton(id, iconClass, text) {
 
 }
 
-addSiteButton.onclick = function () {
-    chrome.runtime.sendMessage({ site: new Site(siteInput.value) }, function (response) {
+function addSite(site) {
+    chrome.runtime.sendMessage({ site: site }, function (response) {
         if ( response.error != null) {
             console.error(response.error);
         } else if ( response.sites != null ) {
             siteInput.value = '';
-            setTable(response.sites, sitesTable);
+            setTable(response.sites.filter(s => s.isReddit === site.isReddit), site.isReddit ? redditTable : sitesTable);
         }
     });
+}
+
+function loadSites(table, filter=(site => true)) {
+    chrome.storage.sync.get('blockedSites', function (data) {
+        if ( data.blockedSites != null) {
+            const sites = data.blockedSites.split(',').map(site => new Site(site)).filter(filter);
+            setTable(sites, table);
+        }
+    });
+}
+
+addSiteButton.onclick = function () {
+    addSite(new Site(siteInput.value));
 };
 
 addRedditButton.onclick = function () {
-    chrome.runtime.sendMessage({ reddit: new Site(redditInput.value, true)}, function (response) {
-        if ( response.error != null ) {
-            console.error(response.error);
-        } else if ( response.reddits != null ) {
-            redditInput.value = '';
-            setTable(response.reddits, redditTable);
-        }
-    })
+    addSite(new Site(redditInput.value, true));
 };
 
 sitesToggle.onclick = function () {
@@ -56,12 +62,7 @@ sitesToggle.onclick = function () {
     sitesToggle.classList.remove('nav-button-inactive');
     redditToggle.classList.add('nav-button-inactive');
     activeTab = "Sites";
-    chrome.storage.sync.get('blockedSites', function (data) {
-        if ( data.blockedSites != null) {
-            const sites = data.blockedSites.split(',').map(site => new Site(site));
-            setTable(sites, sitesTable);
-        }
-    });
+    loadSites(sitesTable, (site => !site.isReddit));
 };
 
 redditToggle.onclick = function () {
@@ -72,46 +73,35 @@ redditToggle.onclick = function () {
     sitesToggle.classList.add('nav-button-inactive');
     redditToggle.classList.remove('nav-button-inactive');
     activeTab = "Reddit";
-    chrome.storage.sync.get('blockedReddits', function (data) {
-        if ( data.blockedReddits != null) {
-            const reddits = data.blockedReddits.split(',').map(reddit => new Site(reddit));
-            setTable(reddits, redditTable);
-        }
-    });
+    loadSites(redditTable, (site => site.isReddit));
 };
 
-function lock(item) {
-    chrome.runtime.sendMessage({ lock: item, activeTab: activeTab }, function (response) {
+function lock(site) {
+    chrome.runtime.sendMessage({ lock: site }, function (response) {
         if ( response.error != null ) {
             console.error(response.error);
         } else if ( response.sites != null ) {
-            setTable(response.sites, sitesTable);
-        } else if ( response.reddits != null ) {
-            setTable(response.reddits, redditTable);
+            setTable(response.sites.filter(s => s.isReddit === site.isReddit), site.isReddit ? redditTable : sitesTable);
         }
     })
 }
 
-function disable(item) {
-    chrome.runtime.sendMessage({ disable: item, activeTab: activeTab }, function (response) {
+function disable(site) {
+    chrome.runtime.sendMessage({ disable: site }, function (response) {
         if ( response.error != null ) {
             console.error(response.error);
         } else if ( response.sites != null ) {
-            setTable(response.sites, sitesTable);
-        } else if ( response.reddits != null ) {
-            setTable(response.reddits, redditTable);
+            setTable(response.sites.filter(s => s.isReddit === site.isReddit), site.isReddit ? redditTable : sitesTable);
         }
     })
 }
 
-function remove(item) {
-    chrome.runtime.sendMessage({ delete: item, activeTab: activeTab }, function (response) {
+function remove(site) {
+    chrome.runtime.sendMessage({ delete: site }, function (response) {
         if ( response.error != null ) {
-            console.log(response.error);
+            console.error(response.error);
         } else if ( response.sites != null) {
-            setTable(response.sites, sitesTable);
-        } else if ( response.reddits != null ) {
-            setTable(response.reddits, redditTable);
+            setTable(response.sites.filter(s => s.isReddit === site.isReddit), site.isReddit ? redditTable : sitesTable);
         }
     })
 }
@@ -166,40 +156,27 @@ function setTable(items, table) {
     }
 }
 
-chrome.storage.sync.get('blockedSites', function (data) {
-    if ( data.blockedSites != null) {
-        const sites = data.blockedSites.split(',').map(site => new Site(site));
-        setTable(sites, sitesTable);
-    }
-});
+loadSites(sitesTable, (site => !site.isReddit));
 
 class Site {
     url;
     isLocked = false;
     isDisabled = false;
 
-    constructor(url) {
+    constructor(url, isReddit = false) {
+        this.url = url;
         this.isReddit = isReddit;
-        if ( url.startsWith('^l') ) {
+        if (this.url.startsWith('^l')) {
             this.isLocked = true;
-            this.url = url.substr(2);
-            if ( this.url.startsWith('r')) {
-                this.isReddit = true;
-                this.url = this.url.substr(2);
-            }
-        } else if ( url.startsWith('^d') ) {
-            this.isDisabled = true;
-            this.url = url.substr(2);
-            if ( this.url.startsWith('r')) {
-                this.isReddit = true;
-                this.url = this.url.substr(2);
-            }
-        } else {
-            this.url = url;
+            this.url = this.url.substr(2);
         }
-    }
-
-    toUrlString() {
-        return this.isLocked ? `^l${this.url}` : this.isDisabled ? `^d${this.url}` : this.url;
+        if (this.url.startsWith('^d')) {
+            this.isDisabled = true;
+            this.url = this.url.substr(2);
+        }
+        if (this.url.startsWith('^r')) {
+            this.isReddit = true;
+            this.url = this.url.substr(2);
+        }
     }
 }
