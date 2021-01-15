@@ -12,8 +12,18 @@ const redditTable = document.getElementById('redditTable');
 
 let activeTab = 'Sites';
 
-function createIconButton(id, iconClass) {
-    return `<button class="btn btn-transparent btn-sm" id="${id}"><i class="${iconClass}"></i></button>`;
+function createIconButton(id, iconClass, text) {
+    if ( text == null) {
+        return `<button class="btn btn-transparent btn-sm" id="${id}"><i class="${iconClass}"></i></button>`;
+    } else {
+        return `
+        <button class="btn btn-transparent btn-sm" id="${id}">
+               <span class="text-light">${text}</span>
+               <i class="${iconClass}"></i>
+        </button>
+        `;
+    }
+
 }
 
 addSiteButton.onclick = function () {
@@ -117,32 +127,41 @@ function setTable(items, table) {
 
         const contentCell = row.insertCell(0);
         const lockCell = row.insertCell(1);
-        const disableCell = row.insertCell(2);
-        const deleteCell = row.insertCell(3);
 
         contentCell.innerHTML = items[i].url;
-        lockCell.innerHTML = createIconButton('lock' + activeTab + items[i].url, items[i].isLocked ? 'fa fa-lock-open text-white' :'fa fa-lock text-white');
-        disableCell.innerHTML = createIconButton('disable' + activeTab + items[i].url, items[i].isDisabled ? 'fa fa-check text-primary' : 'fa fa-ban text-warning');
-        deleteCell.innerHTML = createIconButton('delete' + activeTab + items[i].url, 'fa fa-trash text-danger');
+        lockCell.innerHTML = createIconButton(
+            'lock' + activeTab + items[i].url, 'fa fa-lock text-white'
+        );
 
-        contentCell.style.width = '280px';
-        lockCell.style.width = '40px';
-        disableCell.style.width = '40px';
-        deleteCell.style.width = '40px';
+        if ( items[i].isLocked ) {
+            const fill1 = row.insertCell(2);
+            const fill2 = row.insertCell(2);
+            contentCell.style.width = '360px';
+            lockCell.style.width = '40px';
+            fill1.style.width = '0';
+            fill2.style.width = '0';
+            document.getElementById('lock' + activeTab + items[i].url).disabled = true;
+        } else {
+            const disableCell = row.insertCell(2);
+            const deleteCell = row.insertCell(3);
 
-        document.getElementById('lock' + activeTab + items[i].url).onclick = function () {
-            lock(items[i]);
-        };
-        document.getElementById('disable' + activeTab + items[i].url).onclick = function () {
-            disable(items[i]);
-        };
-        document.getElementById('delete' + activeTab + items[i].url).onclick = function () {
-            remove(items[i]);
-        };
+            disableCell.innerHTML = createIconButton('disable' + activeTab + items[i].url, items[i].isDisabled ? 'fa fa-check text-primary' : 'fa fa-ban text-warning');
+            deleteCell.innerHTML = createIconButton('delete' + activeTab + items[i].url, 'fa fa-trash text-danger');
 
-        if (items[i].isLocked) {
-            document.getElementById('disable' + activeTab + items[i].url).disabled = true;
-            document.getElementById('delete' + activeTab + items[i].url).disabled = true;
+            contentCell.style.width = '280px';
+            lockCell.style.width = '40px';
+            disableCell.style.width = '40px';
+            deleteCell.style.width = '40px';
+
+            document.getElementById('disable' + activeTab + items[i].url).onclick = function () {
+                disable(items[i]);
+            };
+            document.getElementById('delete' + activeTab + items[i].url).onclick = function () {
+                remove(items[i]);
+            };
+            document.getElementById('lock' + activeTab + items[i].url).onclick = function () {
+                lock(items[i]);
+            };
         }
     }
 }
