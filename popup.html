@@ -6,9 +6,10 @@
 </head>
 <body class="bg-dark text-white mb-2" style="width: 400px; height: 500px">
     <div class="container">
+        <!-- Sites -->
         <div id="tabSites" style="height: 460px" class="scrollable mt-3">
             <h6>Sites</h6>
-            <div class="row px-2 py-2">
+            <div class="row px-2 py-2 mx-1">
                 <input id="newSite" placeholder="Block Site" class="col-10 fancy-input">
                 <button class="btn btn-transparent col-2 text-primary" id="addSiteButton" type="submit">
                     <i class="fa fa-plus"></i>
@@ -16,9 +17,10 @@
             </div>
             <table id="sitesTable" class="table table-dark table-striped"></table>
         </div>
+        <!-- Reddit -->
         <div id="tabReddit" style="height: 460px" class="scrollable mt-3" hidden>
             <h6>Reddit</h6>
-            <div class="row px-2 py-2">
+            <div class="row px-2 py-2 mx-1">
                 <input id="newReddit" placeholder="Block Reddit" class="col-10">
                 <button class="btn btn-transparent col-2 text-primary" id="addRedditButton" type="submit">
                     <i class="fa fa-plus"></i>
@@ -26,9 +28,19 @@
             </div>
             <table id="redditTable" class="table table-dark table-striped"></table>
         </div>
+        <!-- Settings -->
+        <div id="tabSettings" style="height: 460px" class="scrollable mt-3" hidden>
+            <h6>Settings</h6>
+            <button class="btn btn-transparent mx-1">
+                <span class="text-white">Locked Sites / Reddits</span>
+                <i class="fa fa-caret-down text-white"></i>
+            </button>
+            <table id="settingsLockedTable" class="table table-dark table-striped"></table>
+        </div>
         <div class="d-flex justify-content-between">
             <button class="btn btn-transparent text-white w-100 nav-button" id="sitesToggle" disabled>Sites</button>
             <button class="btn btn-transparent text-white w-100 nav-button nav-button-inactive" id="redditToggle">Reddit</button>
+            <button class="btn btn-transparent text-white w-100 nav-button nav-button-inactive" id="settingsToggle">Settings</button>
         </div>
     </div>
 </body>
