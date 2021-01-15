@@ -1,5 +1,6 @@
 chrome.runtime.onMessage.addListener(
     function (request, sender, sendResponse) {
+        // Site request from content.js
         if ( request.getSites != null ) {
             chrome.storage.sync.get('blockedSites', function (data) {
                 let sites = [];
@@ -8,6 +9,7 @@ chrome.runtime.onMessage.addListener(
                 }
                 sendResponse({ sites: sites });
             });
+            // Reddit request from content-reddit.js
         } else if ( request.getReddits != null ) {
             chrome.storage.sync.get('blockedReddits', function (data) {
                 let reddits = [];
@@ -16,6 +18,7 @@ chrome.runtime.onMessage.addListener(
                 }
                 sendResponse({ reddits: reddits });
             });
+            // Add site request from popup.js
         } else if ( request.site != null ) {
             chrome.storage.sync.get('blockedSites', function (data) {
                 let siteStrings = [];
@@ -23,10 +26,11 @@ chrome.runtime.onMessage.addListener(
                     siteStrings = data.blockedSites.split(',');
                 }
                 siteStrings.push(request.site.url);
-                chrome.storage.sync.set({ 'blockedSites': siteStrings.join(',') });
+                chrome.storage.sync.set({ 'blockedSites': siteStrings.join(',') }); // Insert '' to delete every blocked site
                 const sites = siteStrings.map(site => new Site(site));
                 sendResponse({ sites: sites });
             });
+            // Add reddit request from popup.js
         } else if ( request.reddit != null ) {
             chrome.storage.sync.get('blockedReddits', function (data) {
                 let redditStrings = [];
@@ -34,17 +38,20 @@ chrome.runtime.onMessage.addListener(
                     redditStrings = data.blockedReddits.split(',');
                 }
                 redditStrings.push(request.reddit.url);
-                chrome.storage.sync.set({ 'blockedReddits': redditStrings.join(',') });
+                chrome.storage.sync.set({ 'blockedReddits': redditStrings.join(',') }); // Insert '' to delete every blocked reddit
                 const reddits = redditStrings.map(reddit => new Site(reddit));
                 sendResponse({ reddits: reddits });
             });
+            // Redirect tab
         } else if ( request.url != null ) {
             chrome.tabs.update( { url: request.url });
             alert('BLOCKED');
             sendResponse({});
+            // Delete request from popup.js
         } else if ( request.delete != null ) {
             if ( request.activeTab == null ) {
                 sendResponse({ error: 'Active tab not given.'});
+                // Site delete request
             } else if ( request.activeTab === 'Sites') {
                 chrome.storage.sync.get('blockedSites', function (data) {
                     if ( request.delete.isLocked ) {
@@ -57,6 +64,7 @@ chrome.runtime.onMessage.addListener(
                         sendResponse({ sites: sites });
                     }
                 });
+                // Reddit delete request
             } else if ( request.activeTab === 'Reddit') {
                 chrome.storage.sync.get('blockedReddits', function (data) {
                     if ( request.delete.isLocked ) {
@@ -70,9 +78,12 @@ chrome.runtime.onMessage.addListener(
                     }
                 });
             }
+            // Lock request from popup.js
         } else if (request.lock != null) {
+            console.log(request.lock);
             if ( request.activeTab == null ) {
                 sendResponse({ error: 'Active tab not given.'});
+                // Site lock request
             } else if ( request.activeTab === 'Sites') {
                 chrome.storage.sync.get('blockedSites', function (data) {
                     const sites = data.blockedSites.split(',')
@@ -81,6 +92,7 @@ chrome.runtime.onMessage.addListener(
                     chrome.storage.sync.set({ 'blockedSites': sites.map(site => site.toUrlString()).join(',')});
                     sendResponse({ sites: sites });
                 });
+                // Reddit lock request
             } else if ( request.activeTab === 'Reddit') {
                 chrome.storage.sync.get('blockedReddits', function (data) {
                     const reddits = data.blockedReddits.split(',')
@@ -90,9 +102,11 @@ chrome.runtime.onMessage.addListener(
                     sendResponse({ reddits: reddits });
                 });
             }
+            // Disable request from popup.js
         } else if ( request.disable != null) {
             if ( request.activeTab == null ) {
                 sendResponse({ error: 'Active tab not given.'});
+                // Site lock request
             } else if ( request.activeTab === 'Sites') {
                 chrome.storage.sync.get('blockedSites', function (data) {
                     if ( request.disable.isLocked ) {
@@ -105,6 +119,7 @@ chrome.runtime.onMessage.addListener(
                         sendResponse({ sites: sites });
                     }
                 });
+                // Reddit lock request
             } else if ( request.activeTab === 'Reddit') {
                 chrome.storage.sync.get('blockedReddits', function (data) {
                     if ( request.disable.isLocked ) {

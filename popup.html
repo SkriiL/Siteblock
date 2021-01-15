@@ -6,19 +6,20 @@
 </head>
 <body class="bg-dark text-white mb-2" style="width: 400px; height: 500px">
     <div class="container">
-        <h6 class="mt-3">Siteblock</h6>
-        <div id="tabSites" style="height: 430px" class="scrollable">
+        <div id="tabSites" style="height: 460px" class="scrollable mt-3">
+            <h6>Sites</h6>
             <div class="row px-2 py-2">
-                <input id="newSite" placeholder="New Site" class="col-10">
+                <input id="newSite" placeholder="Block Site" class="col-10 fancy-input">
                 <button class="btn btn-transparent col-2 text-primary" id="addSiteButton" type="submit">
                     <i class="fa fa-plus"></i>
                 </button>
             </div>
             <table id="sitesTable" class="table table-dark table-striped"></table>
         </div>
-        <div id="tabReddit" style="height: 430px" class="scrollable" hidden>
+        <div id="tabReddit" style="height: 460px" class="scrollable mt-3" hidden>
+            <h6>Reddit</h6>
             <div class="row px-2 py-2">
-                <input id="newReddit" placeholder="New Reddit" class="col-10">
+                <input id="newReddit" placeholder="Block Reddit" class="col-10">
                 <button class="btn btn-transparent col-2 text-primary" id="addRedditButton" type="submit">
                     <i class="fa fa-plus"></i>
                 </button>
