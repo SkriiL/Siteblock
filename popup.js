@@ -38,7 +38,7 @@ addSiteButton.onclick = function () {
 };
 
 addRedditButton.onclick = function () {
-    chrome.runtime.sendMessage({ reddit: new Site(redditInput.value)}, function (response) {
+    chrome.runtime.sendMessage({ reddit: new Site(redditInput.value, true)}, function (response) {
         if ( response.error != null ) {
             console.error(response.error);
         } else if ( response.reddits != null ) {
@@ -179,12 +179,21 @@ class Site {
     isDisabled = false;
 
     constructor(url) {
+        this.isReddit = isReddit;
         if ( url.startsWith('^l') ) {
             this.isLocked = true;
             this.url = url.substr(2);
+            if ( this.url.startsWith('r')) {
+                this.isReddit = true;
+                this.url = this.url.substr(2);
+            }
         } else if ( url.startsWith('^d') ) {
             this.isDisabled = true;
             this.url = url.substr(2);
+            if ( this.url.startsWith('r')) {
+                this.isReddit = true;
+                this.url = this.url.substr(2);
+            }
         } else {
             this.url = url;
         }

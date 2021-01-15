@@ -144,20 +144,35 @@ class Site {
     url;
     isLocked = false;
     isDisabled = false;
+    isReddit = false;
 
-    constructor(url) {
-        if ( url.startsWith('^l') ) {
+    constructor(url, isReddit=false) {
+        this.url = url;
+        this.isReddit = isReddit;
+        if ( this.url.startsWith('^l') ) {
             this.isLocked = true;
-            this.url = url.substr(2);
-        } else if ( url.startsWith('^d') ) {
+            this.url = this.url.substr(2);
+        }
+        if ( url.startsWith('^d') ) {
             this.isDisabled = true;
             this.url = url.substr(2);
-        } else {
-            this.url = url;
+        }
+        if ( this.url.startsWith('^r')) {
+            this.isReddit = true;
+            this.url = this.url.substr(2);
         }
     }
 
     toUrlString() {
-        return this.isLocked ? `^l${this.url}` : this.isDisabled ? `^d${this.url}` : this.url;
+        let url = this.url;
+        if ( this.isReddit ) {
+            url = '^r' + url;
+        }
+        if ( this.isDisabled ) {
+            url = '^d' + url;
+        }
+        if ( this.isLocked ) {
+            url = '^l' + url;
+        }
     }
 }
