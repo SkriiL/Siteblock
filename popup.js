@@ -1,3 +1,4 @@
+// HTML Elements
 const tabSites = document.getElementById('tabSites');
 const sitesToggle = document.getElementById('sitesToggle');
 const addSiteButton = document.getElementById('addSiteButton');
@@ -17,6 +18,7 @@ const settingsLockedDropdown = document.getElementById('settingsLockedDropdown')
 
 let activeTab = 'Sites';
 
+// Create an Icon Button (table)
 function createIconButton(id, iconClass, text) {
     if ( text == null) {
         return `<button class="btn btn-transparent btn-sm" id="${id}"><i class="${iconClass}"></i></button>`;
@@ -30,6 +32,7 @@ function createIconButton(id, iconClass, text) {
     }
 }
 
+// add a site to the blocked sites
 function addSite(site) {
     chrome.runtime.sendMessage({ site: site }, function (response) {
         if ( response.error != null) {
@@ -41,6 +44,7 @@ function addSite(site) {
     });
 }
 
+// Load all blocked sites
 function loadSites(table, filter=(site => true)) {
     chrome.storage.sync.get('blockedSites', function (data) {
         if ( data.blockedSites != null) {
@@ -50,14 +54,17 @@ function loadSites(table, filter=(site => true)) {
     });
 }
 
+// Add Site Button
 addSiteButton.onclick = function () {
     addSite(new Site(siteInput.value));
 };
 
+// Add Reddit Button
 addRedditButton.onclick = function () {
     addSite(new Site(redditInput.value, true));
 };
 
+// Sites Tab Toggle
 sitesToggle.onclick = function () {
     tabSites.hidden = false;
     tabReddit.hidden = true;
@@ -72,6 +79,7 @@ sitesToggle.onclick = function () {
     loadSites(sitesTable, (site => !site.isReddit));
 };
 
+// Reddit Tab toggle
 redditToggle.onclick = function () {
     tabSites.hidden = true;
     tabReddit.hidden = false;
@@ -86,6 +94,7 @@ redditToggle.onclick = function () {
     loadSites(redditTable, (site => site.isReddit));
 };
 
+// Settings Tab toggle
 settingsToggle.onclick = function () {
     tabSites.hidden = true;
     tabReddit.hidden = true;
@@ -119,6 +128,7 @@ settingsLockedDropdown.onclick = function () {
     }
 }
 
+// lock a site
 function lock(site) {
     chrome.runtime.sendMessage({ lock: site }, function (response) {
         console.log(site);
@@ -134,6 +144,7 @@ function lock(site) {
     })
 }
 
+// disable a site
 function disable(site) {
     chrome.runtime.sendMessage({ disable: site }, function (response) {
         if ( response.error != null ) {
@@ -144,6 +155,7 @@ function disable(site) {
     })
 }
 
+// remove a site
 function remove(site) {
     chrome.runtime.sendMessage({ delete: site }, function (response) {
         if ( response.error != null ) {
@@ -154,7 +166,9 @@ function remove(site) {
     })
 }
 
+// Fill the table
 function setTable(items, table) {
+    // empty the table
     for ( let j = table.rows.length - 1; j >= 0; j-- ) {
         table.deleteRow(j);
     }
@@ -167,6 +181,7 @@ function setTable(items, table) {
 
         contentCell.innerHTML = items[i].url;
 
+        // Settings Tab
         if ( activeTab === 'Settings' ) {
             const iconCell = row.insertCell(0); // TODO show Reddit
             iconCell.innerHTML = `<i class="${items[i].isReddit ? 'fa fa-reddit-alien text-white' : 'fa fa-external-link-alt text-white'}"></i>`;
@@ -182,6 +197,7 @@ function setTable(items, table) {
             document.getElementById('lock' + items[i].isReddit ? 'Reddit' : 'Sites' + items[i].url).onclick = function () {
                 lock(items[i]);
             };
+            // not Settings Tab
         } else {
             lockCell.innerHTML = createIconButton(
                 'lock' + activeTab + items[i].url, 'fa fa-lock text-white'
@@ -221,6 +237,7 @@ function setTable(items, table) {
     }
 }
 
+// Load sites at init of popup
 loadSites(sitesTable, (site => !site.isReddit));
 
 class Site {

@@ -6,6 +6,7 @@ chrome.runtime.sendMessage({ getSites: true }, function (response) {
     }
 });
 
+// Redirect, if reddit is blocked
 function isBlocked(reddits) {
     reddits.forEach(reddit => {
         if ( !reddit.isDisabled ) {

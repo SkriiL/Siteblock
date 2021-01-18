@@ -6,6 +6,7 @@ chrome.runtime.sendMessage({ getSites: true }, function (response) {
     }
 });
 
+// Redirect, if site is blocked
 function isBlocked(sites) {
     sites.forEach(site => {
         if ( !site.isDisabled ) {
