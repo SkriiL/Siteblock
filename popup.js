@@ -13,6 +13,7 @@ const redditTable = document.getElementById('redditTable');
 const tabSettings = document.getElementById('tabSettings');
 const settingsToggle = document.getElementById('settingsToggle');
 const settingsLockedTable = document.getElementById('settingsLockedTable');
+const settingsLockedDropdown = document.getElementById('settingsLockedDropdown');
 
 let activeTab = 'Sites';
 
@@ -96,32 +97,39 @@ settingsToggle.onclick = function () {
     redditToggle.classList.add('nav-button-inactive');
     settingsToggle.classList.remove('nav-button-inactive');
     activeTab = "Settings";
-    chrome.storage.sync.get('blockedSites', function (sitesData) {
-        chrome.storage.sync.get('blockedReddits', function (redditData) {
-            if ( sitesData.blockedSites != null && redditData.blockedReddits != null) {
-                const sites = sitesData.blockedSites.split(',').map(site => new Site(site));
-                const reddits = redditData.blockedReddit.split(',').map(reddit => new Site(reddit));
-                const locked = sites.concat(reddits).filter(item => item.isLocked);
-                setTable(locked, settingsLockedTable);
-            } else if ( sitesData.blockedSites != null ) {
-                const sites = sitesData.blockedSites.split(',').map(site => new Site(site));
-                const locked = sites.filter(site => site.isLocked);
-                setTable(locked, settingsLockedTable);
-            } else if ( redditData.blockedReddits != null ) {
-                const reddits = redditData.blockedReddit.split(',').map(reddit => new Site(reddit));
-                const locked = reddits.filter(reddit => reddit.isLocked);
-                setTable(locked, settingsLockedTable);
-            }
-        })
-    });
+    loadSites(settingsLockedTable, (site => site.isLocked));
+}
+
+// Locked sites dropdown toggle
+let settingsLockedOpen = false;
+settingsLockedTable.hidden = true;
+
+settingsLockedDropdown.onclick = function () {
+    const icon = settingsLockedDropdown.getElementsByTagName('i')[0];
+    if ( settingsLockedOpen ) {
+        icon.classList.remove('fa-caret-up');
+        icon.classList.add('fa-caret-down');
+        settingsLockedTable.hidden = true;
+        settingsLockedOpen = false;
+    } else {
+        icon.classList.remove('fa-caret-down');
+        icon.classList.add('fa-caret-up');
+        settingsLockedTable.hidden = false;
+        settingsLockedOpen = true;
+    }
 }
 
 function lock(site) {
     chrome.runtime.sendMessage({ lock: site }, function (response) {
+        console.log(site);
         if ( response.error != null ) {
             console.error(response.error);
         } else if ( response.sites != null ) {
-            setTable(response.sites.filter(s => s.isReddit === site.isReddit), site.isReddit ? redditTable : sitesTable);
+            if ( activeTab === 'Settings' ) {
+                setTable(response.sites.filter(s => s.isLocked), settingsLockedTable);
+            } else {
+                setTable(response.sites.filter(s => s.isReddit === site.isReddit), site.isReddit ? redditTable : sitesTable);
+            }
         }
     })
 }
@@ -160,10 +168,8 @@ function setTable(items, table) {
         contentCell.innerHTML = items[i].url;
 
         if ( activeTab === 'Settings' ) {
-            const iconCell = row.insertCell(0);
-            iconCell.innerHTML = createIconButton( // TODO make this show
-                'icon' + i, items[i].isReddit ? 'fa fa-reddit text-white' : 'fa fa-external-link text-white'
-            );
+            const iconCell = row.insertCell(0); // TODO show Reddit
+            iconCell.innerHTML = `<i class="${items[i].isReddit ? 'fa fa-reddit-alien text-white' : 'fa fa-external-link-alt text-white'}"></i>`;
 
             lockCell.innerHTML = createIconButton(
                 'lock' + items[i].isReddit ? 'Reddit' : 'Sites' + items[i].url, 'fa fa-lock-open text-white'
