@@ -17,6 +17,7 @@ const tabSettings = document.getElementById('tabSettings');
 const settingsToggle = document.getElementById('settingsToggle');
 const settingsLockedTable = document.getElementById('settingsLockedTable');
 const settingsLockedDropdown = document.getElementById('settingsLockedDropdown');
+const settingsLockedCount = document.getElementById('settingsLockedCount');
 const settingsTutorialDropdown = document.getElementById('settingsTutorialDropdown');
 const settingsTutorial = document.getElementById('settingsTutorial');
 
@@ -78,6 +79,8 @@ function loadSites(table, filter = (site => true)) {
         if (data.blockedSites != null) {
             const sites = data.blockedSites.split(',').map(site => new Site(site)).filter(filter);
             setTable(sites, table);
+        } else {
+            settingsLockedDropdown.disabled = true;
         }
     });
 }
@@ -212,6 +215,9 @@ function setTable(items, table) {
         table.deleteRow(j);
     }
 
+    settingsLockedDropdown.disabled = items.length === 0;
+    settingsLockedCount.innerHTML = items.length.toString();
+
     for (let i = 0; i < items.length; i++) {
         const row = table.insertRow(i);
 
@@ -225,6 +231,7 @@ function setTable(items, table) {
         if (activeTab === 'Settings') {
             const iconCell = row.insertCell(0);
             iconCell.innerHTML = `<i class="${items[i].isReddit ? 'fab fa-reddit-alien text-white' : 'fas fa-external-link-alt text-white'}"></i>`;
+            iconCell.style.lineHeight = '1.6';
 
             lockCell.innerHTML = createIconButton(
                 'lock' + items[i].isReddit ? 'Reddit' : 'Sites' + items[i].url, 'fas fa-lock-open text-white'
