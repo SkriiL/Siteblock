@@ -169,7 +169,7 @@ function setTable(items, table) {
 
         if ( activeTab === 'Settings' ) {
             const iconCell = row.insertCell(0); // TODO show Reddit
-            iconCell.innerHTML = `<i class="${items[i].isReddit ? 'fa fa-reddit-alien text-white' : 'fa fa-external-link-alt text-white'}"></i>`;
+            iconCell.innerHTML = `<i class="${items[i].isReddit ? 'fab fa-reddit-alien text-white' : 'fa fa-external-link-alt text-white'}"></i>`;
 
             lockCell.innerHTML = createIconButton(
                 'lock' + items[i].isReddit ? 'Reddit' : 'Sites' + items[i].url, 'fa fa-lock-open text-white'
