@@ -40,8 +40,4 @@ The site cannot be disabled or deleted after locking it.
 ## Unlock locked Sites / Reddits
 Navigate to Settings and open Locked Sites / Reddits. Click  to unlock the site.
 
-
-
-
 The site can be disabled and deleted again after unlocking it.
-If you discover any issues or have an idea for a new functionality, please send a mail to siteblockextension@gmail.com.
