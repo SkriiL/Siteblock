@@ -6,7 +6,7 @@
     "48": "assets/icon48.png",
     "128": "assets/icon128.png"
   },
-  "permissions": ["storage", "declarativeContent", "activeTab", "tabs"],
+  "permissions": ["storage", "tabs"],
   "background": {
     "scripts": ["background.js"],
     "persistent": false
