@@ -19,3 +19,7 @@
 .btn-dropdown {
     border: solid 2px #3b3b3b; !important;
 }
+
+.input-error {
+    box-shadow: 0 0 10px red;
+}

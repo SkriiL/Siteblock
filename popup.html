@@ -9,24 +9,30 @@
         <!-- Sites -->
         <div id="tabSites" style="height: 460px" class="scrollable mt-3">
             <h6>Sites</h6>
-            <div class="row px-2 py-2 mx-1">
-                <input id="newSite" placeholder="Block Site" class="col-10 fancy-input">
+            <div class="row py-2 mx-1">
+                <div class="col-10">
+                    <input id="newSite" placeholder="Block Site" class="form-control">
+                </div>
                 <button class="btn btn-transparent col-2 text-primary" id="addSiteButton" type="submit">
                     <i class="fas fa-plus"></i>
                 </button>
             </div>
-            <table id="sitesTable" class="table table-dark table-striped"></table>
+            <span class="text-danger" id="sitesErrorText" hidden>Please enter a site to block first.</span>
+            <table id="sitesTable" class="table table-dark table-striped mt-2"></table>
         </div>
         <!-- Reddit -->
         <div id="tabReddit" style="height: 460px" class="scrollable mt-3" hidden>
             <h6>Reddit</h6>
-            <div class="row px-2 py-2 mx-1">
-                <input id="newReddit" placeholder="Block Reddit" class="col-10">
+            <div class="row py-2 mx-1">
+                <div class="col-10">
+                    <input id="newReddit" placeholder="Block Reddit" class="form-control">
+                </div>
                 <button class="btn btn-transparent col-2 text-primary" id="addRedditButton" type="submit">
                     <i class="fas fa-plus"></i>
                 </button>
             </div>
-            <table id="redditTable" class="table table-dark table-striped"></table>
+            <span class="text-danger" id="redditErrorText" hidden></span>
+            <table id="redditTable" class="table table-dark table-striped mt-2"></table>
         </div>
         <!-- Settings -->
         <div id="tabSettings" style="height: 460px" class="scrollable mt-3" hidden>

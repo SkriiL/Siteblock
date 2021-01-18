@@ -4,12 +4,14 @@ const sitesToggle = document.getElementById('sitesToggle');
 const addSiteButton = document.getElementById('addSiteButton');
 const siteInput = document.getElementById('newSite');
 const sitesTable = document.getElementById('sitesTable');
+const sitesErrorText = document.getElementById('sitesErrorText');
 
 const tabReddit = document.getElementById('tabReddit');
 const redditToggle = document.getElementById('redditToggle');
 const addRedditButton = document.getElementById('addRedditButton');
 const redditInput = document.getElementById('newReddit');
 const redditTable = document.getElementById('redditTable');
+const redditErrorText = document.getElementById('redditErrorText');
 
 const tabSettings = document.getElementById('tabSettings');
 const settingsToggle = document.getElementById('settingsToggle');
@@ -34,6 +36,23 @@ function createIconButton(id, iconClass, text) {
 
 // add a site to the blocked sites
 function addSite(site) {
+    if (site.url === '' ||  site.url == null) {
+        if ( site.isReddit ) {
+            redditErrorText.innerHTML = 'Please enter a Reddit first.';
+            redditErrorText.hidden = false;
+            redditInput.classList.add('input-error');
+        } else {
+            sitesErrorText.innerHTML = 'Please enter a site first.';
+            sitesErrorText.hidden = false;
+            siteInput.classList.add('input-error');
+        }
+        return;
+    } else if (!site.isReddit && !/.*\..*/.test(site.url)) {
+        sitesErrorText.innerHTML = 'Sites need to contain a Top-Level-Domain (e.g. ".com").';
+        sitesErrorText.hidden = false;
+        siteInput.classList.add('input-error');
+        return;
+    }
     chrome.runtime.sendMessage({ site: site }, function (response) {
         if ( response.error != null) {
             console.error(response.error);
@@ -63,6 +82,22 @@ addSiteButton.onclick = function () {
 addRedditButton.onclick = function () {
     addSite(new Site(redditInput.value, true));
 };
+
+// hide 'Please enter a site to block first.'
+siteInput.oninput = function (event) {
+    if (sitesErrorText.hidden === false && event.data != null && event.data.length > 0) {
+        sitesErrorText.hidden = true;
+        siteInput.classList.remove('input-error');
+    }
+}
+
+// hide 'Please enter a Reddit to block first.'
+redditInput.oninput = function (event) {
+    if (redditErrorText.hidden === false && event.data != null && event.data.length > 0) {
+        redditErrorText.hidden = true;
+        redditInput.classList.remove('input-error');
+    }
+}
 
 // Sites Tab Toggle
 sitesToggle.onclick = function () {
@@ -177,6 +212,7 @@ function setTable(items, table) {
         const row = table.insertRow(i);
 
         const contentCell = row.insertCell(0);
+        contentCell.style.lineHeight = '1.6';
         const lockCell = row.insertCell(1);
 
         contentCell.innerHTML = items[i].url;
