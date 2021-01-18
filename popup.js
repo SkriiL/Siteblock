@@ -4,14 +4,14 @@ const sitesToggle = document.getElementById('sitesToggle');
 const addSiteButton = document.getElementById('addSiteButton');
 const siteInput = document.getElementById('newSite');
 const sitesTable = document.getElementById('sitesTable');
-const sitesAddText = document.getElementById('sitesAddText');
+const sitesErrorText = document.getElementById('sitesErrorText');
 
 const tabReddit = document.getElementById('tabReddit');
 const redditToggle = document.getElementById('redditToggle');
 const addRedditButton = document.getElementById('addRedditButton');
 const redditInput = document.getElementById('newReddit');
 const redditTable = document.getElementById('redditTable');
-const redditAddText = document.getElementById('redditAddText');
+const redditErrorText = document.getElementById('redditErrorText');
 
 const tabSettings = document.getElementById('tabSettings');
 const settingsToggle = document.getElementById('settingsToggle');
@@ -38,12 +38,19 @@ function createIconButton(id, iconClass, text) {
 function addSite(site) {
     if (site.url === '' ||  site.url == null) {
         if ( site.isReddit ) {
-            redditAddText.hidden = false;
+            redditErrorText.innerHTML = 'Please enter a Reddit first.';
+            redditErrorText.hidden = false;
             redditInput.classList.add('input-error');
         } else {
-            sitesAddText.hidden = false;
+            sitesErrorText.innerHTML = 'Please enter a site first.';
+            sitesErrorText.hidden = false;
             siteInput.classList.add('input-error');
         }
+        return;
+    } else if (!site.isReddit && !/.*\..*/.test(site.url)) {
+        sitesErrorText.innerHTML = 'Sites need to contain a Top-Level-Domain (e.g. ".com").';
+        sitesErrorText.hidden = false;
+        siteInput.classList.add('input-error');
         return;
     }
     chrome.runtime.sendMessage({ site: site }, function (response) {
@@ -78,24 +85,17 @@ addRedditButton.onclick = function () {
 
 // hide 'Please enter a site to block first.'
 siteInput.oninput = function (event) {
-    if (sitesAddText.hidden === false && event.data != null && event.data.length > 0) {
-        sitesAddText.hidden = true;
+    if (sitesErrorText.hidden === false && event.data != null && event.data.length > 0) {
+        sitesErrorText.hidden = true;
+        siteInput.classList.remove('input-error');
     }
 }
 
 // hide 'Please enter a Reddit to block first.'
 redditInput.oninput = function (event) {
-    if (redditAddText.hidden === false && event.data != null && event.data.length > 0) {
-        redditAddText.hidden = true;
+    if (redditErrorText.hidden === false && event.data != null && event.data.length > 0) {
+        redditErrorText.hidden = true;
         redditInput.classList.remove('input-error');
-    }
-}
-
-// hide 'Please enter a site to block first.'
-siteInput.oninput = function (event) {
-    if (sitesAddText.hidden === false && event.data != null && event.data.length > 0) {
-        sitesAddText.hidden = true;
-        siteInput.classList.remove('input-error');
     }
 }
 
