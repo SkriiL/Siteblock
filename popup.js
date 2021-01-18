@@ -17,6 +17,8 @@ const tabSettings = document.getElementById('tabSettings');
 const settingsToggle = document.getElementById('settingsToggle');
 const settingsLockedTable = document.getElementById('settingsLockedTable');
 const settingsLockedDropdown = document.getElementById('settingsLockedDropdown');
+const settingsTutorialDropdown = document.getElementById('settingsTutorialDropdown');
+const settingsTutorial = document.getElementById('settingsTutorial');
 
 let activeTab = 'Sites';
 
@@ -147,7 +149,6 @@ settingsToggle.onclick = function () {
 // Locked sites dropdown toggle
 let settingsLockedOpen = false;
 settingsLockedTable.hidden = true;
-
 settingsLockedDropdown.onclick = function () {
     const icon = settingsLockedDropdown.getElementsByTagName('i')[0];
     if ( settingsLockedOpen ) {
@@ -160,6 +161,24 @@ settingsLockedDropdown.onclick = function () {
         icon.classList.add('fa-caret-up');
         settingsLockedTable.hidden = false;
         settingsLockedOpen = true;
+    }
+}
+
+// Tutorial dropdown toggle
+let settingsTutorialOpen = false;
+settingsTutorial.hidden = true;
+settingsTutorialDropdown.onclick = function () {
+    const icon = settingsTutorialDropdown.getElementsByTagName('i')[0];
+    if ( settingsTutorialOpen ) {
+        icon.classList.remove('fa-caret-up');
+        icon.classList.add('fa-caret-down');
+        settingsTutorial.hidden = true;
+        settingsTutorialOpen = false;
+    } else {
+        icon.classList.remove('fa-caret-down');
+        icon.classList.add('fa-caret-up');
+        settingsTutorial.hidden = false;
+        settingsTutorialOpen = true;
     }
 }
 
