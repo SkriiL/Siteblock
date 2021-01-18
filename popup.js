@@ -4,12 +4,14 @@ const sitesToggle = document.getElementById('sitesToggle');
 const addSiteButton = document.getElementById('addSiteButton');
 const siteInput = document.getElementById('newSite');
 const sitesTable = document.getElementById('sitesTable');
+const sitesAddText = document.getElementById('sitesAddText');
 
 const tabReddit = document.getElementById('tabReddit');
 const redditToggle = document.getElementById('redditToggle');
 const addRedditButton = document.getElementById('addRedditButton');
 const redditInput = document.getElementById('newReddit');
 const redditTable = document.getElementById('redditTable');
+const redditAddText = document.getElementById('redditAddText');
 
 const tabSettings = document.getElementById('tabSettings');
 const settingsToggle = document.getElementById('settingsToggle');
@@ -34,6 +36,16 @@ function createIconButton(id, iconClass, text) {
 
 // add a site to the blocked sites
 function addSite(site) {
+    if (site.url === '' ||  site.url == null) {
+        if ( site.isReddit ) {
+            redditAddText.hidden = false;
+            redditInput.classList.add('input-error');
+        } else {
+            sitesAddText.hidden = false;
+            siteInput.classList.add('input-error');
+        }
+        return;
+    }
     chrome.runtime.sendMessage({ site: site }, function (response) {
         if ( response.error != null) {
             console.error(response.error);
@@ -63,6 +75,29 @@ addSiteButton.onclick = function () {
 addRedditButton.onclick = function () {
     addSite(new Site(redditInput.value, true));
 };
+
+// hide 'Please enter a site to block first.'
+siteInput.oninput = function (event) {
+    if (sitesAddText.hidden === false && event.data != null && event.data.length > 0) {
+        sitesAddText.hidden = true;
+    }
+}
+
+// hide 'Please enter a Reddit to block first.'
+redditInput.oninput = function (event) {
+    if (redditAddText.hidden === false && event.data != null && event.data.length > 0) {
+        redditAddText.hidden = true;
+        redditInput.classList.remove('input-error');
+    }
+}
+
+// hide 'Please enter a site to block first.'
+siteInput.oninput = function (event) {
+    if (sitesAddText.hidden === false && event.data != null && event.data.length > 0) {
+        sitesAddText.hidden = true;
+        siteInput.classList.remove('input-error');
+    }
+}
 
 // Sites Tab Toggle
 sitesToggle.onclick = function () {
