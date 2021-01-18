@@ -212,6 +212,7 @@ function setTable(items, table) {
         const row = table.insertRow(i);
 
         const contentCell = row.insertCell(0);
+        contentCell.style.lineHeight = '1.6';
         const lockCell = row.insertCell(1);
 
         contentCell.innerHTML = items[i].url;
