@@ -10,6 +10,11 @@ const addRedditButton = document.getElementById('addRedditButton');
 const redditInput = document.getElementById('newReddit');
 const redditTable = document.getElementById('redditTable');
 
+const tabSettings = document.getElementById('tabSettings');
+const settingsToggle = document.getElementById('settingsToggle');
+const settingsLockedTable = document.getElementById('settingsLockedTable');
+const settingsLockedDropdown = document.getElementById('settingsLockedDropdown');
+
 let activeTab = 'Sites';
 
 function createIconButton(id, iconClass, text) {
@@ -23,7 +28,6 @@ function createIconButton(id, iconClass, text) {
         </button>
         `;
     }
-
 }
 
 function addSite(site) {
@@ -55,33 +59,77 @@ addRedditButton.onclick = function () {
 };
 
 sitesToggle.onclick = function () {
-    tabReddit.hidden = true;
     tabSites.hidden = false;
+    tabReddit.hidden = true;
+    tabSettings.hidden = true;
     sitesToggle.disabled = true;
     redditToggle.disabled = false;
+    settingsToggle.disabled = false;
     sitesToggle.classList.remove('nav-button-inactive');
     redditToggle.classList.add('nav-button-inactive');
+    settingsToggle.classList.add('nav-button-inactive');
     activeTab = "Sites";
     loadSites(sitesTable, (site => !site.isReddit));
 };
 
 redditToggle.onclick = function () {
-    tabReddit.hidden = false;
     tabSites.hidden = true;
+    tabReddit.hidden = false;
+    tabSettings.hidden = true;
     sitesToggle.disabled = false;
     redditToggle.disabled = true;
+    settingsToggle.disabled = false;
     sitesToggle.classList.add('nav-button-inactive');
     redditToggle.classList.remove('nav-button-inactive');
+    settingsToggle.classList.add('nav-button-inactive');
     activeTab = "Reddit";
     loadSites(redditTable, (site => site.isReddit));
 };
 
+settingsToggle.onclick = function () {
+    tabSites.hidden = true;
+    tabReddit.hidden = true;
+    tabSettings.hidden = false;
+    sitesToggle.disabled = false;
+    redditToggle.disabled = false;
+    settingsToggle.disabled = true;
+    sitesToggle.classList.add('nav-button-inactive');
+    redditToggle.classList.add('nav-button-inactive');
+    settingsToggle.classList.remove('nav-button-inactive');
+    activeTab = "Settings";
+    loadSites(settingsLockedTable, (site => site.isLocked));
+}
+
+// Locked sites dropdown toggle
+let settingsLockedOpen = false;
+settingsLockedTable.hidden = true;
+
+settingsLockedDropdown.onclick = function () {
+    const icon = settingsLockedDropdown.getElementsByTagName('i')[0];
+    if ( settingsLockedOpen ) {
+        icon.classList.remove('fa-caret-up');
+        icon.classList.add('fa-caret-down');
+        settingsLockedTable.hidden = true;
+        settingsLockedOpen = false;
+    } else {
+        icon.classList.remove('fa-caret-down');
+        icon.classList.add('fa-caret-up');
+        settingsLockedTable.hidden = false;
+        settingsLockedOpen = true;
+    }
+}
+
 function lock(site) {
     chrome.runtime.sendMessage({ lock: site }, function (response) {
+        console.log(site);
         if ( response.error != null ) {
             console.error(response.error);
         } else if ( response.sites != null ) {
-            setTable(response.sites.filter(s => s.isReddit === site.isReddit), site.isReddit ? redditTable : sitesTable);
+            if ( activeTab === 'Settings' ) {
+                setTable(response.sites.filter(s => s.isLocked), settingsLockedTable);
+            } else {
+                setTable(response.sites.filter(s => s.isReddit === site.isReddit), site.isReddit ? redditTable : sitesTable);
+            }
         }
     })
 }
@@ -112,46 +160,63 @@ function setTable(items, table) {
     }
 
     for ( let i = 0; i < items.length; i++ ) {
-
         const row = table.insertRow(i);
 
         const contentCell = row.insertCell(0);
         const lockCell = row.insertCell(1);
 
         contentCell.innerHTML = items[i].url;
-        lockCell.innerHTML = createIconButton(
-            'lock' + activeTab + items[i].url, 'fa fa-lock text-white'
-        );
 
-        if ( items[i].isLocked ) {
-            const fill1 = row.insertCell(2);
-            const fill2 = row.insertCell(2);
-            contentCell.style.width = '360px';
+        if ( activeTab === 'Settings' ) {
+            const iconCell = row.insertCell(0); // TODO show Reddit
+            iconCell.innerHTML = `<i class="${items[i].isReddit ? 'fa fa-reddit-alien text-white' : 'fa fa-external-link-alt text-white'}"></i>`;
+
+            lockCell.innerHTML = createIconButton(
+                'lock' + items[i].isReddit ? 'Reddit' : 'Sites' + items[i].url, 'fa fa-lock-open text-white'
+            )
+
+            iconCell.style.width = '40px';
+            contentCell.style.width = '320px';
             lockCell.style.width = '40px';
-            fill1.style.width = '0';
-            fill2.style.width = '0';
-            document.getElementById('lock' + activeTab + items[i].url).disabled = true;
-        } else {
-            const disableCell = row.insertCell(2);
-            const deleteCell = row.insertCell(3);
 
-            disableCell.innerHTML = createIconButton('disable' + activeTab + items[i].url, items[i].isDisabled ? 'fa fa-check text-primary' : 'fa fa-ban text-warning');
-            deleteCell.innerHTML = createIconButton('delete' + activeTab + items[i].url, 'fa fa-trash text-danger');
-
-            contentCell.style.width = '280px';
-            lockCell.style.width = '40px';
-            disableCell.style.width = '40px';
-            deleteCell.style.width = '40px';
-
-            document.getElementById('disable' + activeTab + items[i].url).onclick = function () {
-                disable(items[i]);
-            };
-            document.getElementById('delete' + activeTab + items[i].url).onclick = function () {
-                remove(items[i]);
-            };
-            document.getElementById('lock' + activeTab + items[i].url).onclick = function () {
+            document.getElementById('lock' + items[i].isReddit ? 'Reddit' : 'Sites' + items[i].url).onclick = function () {
                 lock(items[i]);
             };
+        } else {
+            lockCell.innerHTML = createIconButton(
+                'lock' + activeTab + items[i].url, 'fa fa-lock text-white'
+            );
+
+            if ( items[i].isLocked ) {
+                const fill1 = row.insertCell(2);
+                const fill2 = row.insertCell(2);
+                contentCell.style.width = '360px';
+                lockCell.style.width = '40px';
+                fill1.style.width = '0';
+                fill2.style.width = '0';
+                document.getElementById('lock' + activeTab + items[i].url).disabled = true;
+            } else {
+                const disableCell = row.insertCell(2);
+                const deleteCell = row.insertCell(3);
+
+                disableCell.innerHTML = createIconButton('disable' + activeTab + items[i].url, items[i].isDisabled ? 'fa fa-check text-primary' : 'fa fa-ban text-warning');
+                deleteCell.innerHTML = createIconButton('delete' + activeTab + items[i].url, 'fa fa-trash text-danger');
+
+                contentCell.style.width = '280px';
+                lockCell.style.width = '40px';
+                disableCell.style.width = '40px';
+                deleteCell.style.width = '40px';
+
+                document.getElementById('disable' + activeTab + items[i].url).onclick = function () {
+                    disable(items[i]);
+                };
+                document.getElementById('delete' + activeTab + items[i].url).onclick = function () {
+                    remove(items[i]);
+                };
+                document.getElementById('lock' + activeTab + items[i].url).onclick = function () {
+                    lock(items[i]);
+                };
+            }
         }
     }
 }
@@ -162,6 +227,7 @@ class Site {
     url;
     isLocked = false;
     isDisabled = false;
+    isReddit = false;
 
     constructor(url, isReddit = false) {
         this.url = url;
@@ -179,4 +245,9 @@ class Site {
             this.url = this.url.substr(2);
         }
     }
+}
+
+class Settings {
+    blockedSites;
+    blockedReddits;
 }

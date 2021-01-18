@@ -45,7 +45,12 @@ chrome.runtime.onMessage.addListener(
             chrome.storage.sync.get('blockedSites', function (data) {
                 const sites = data.blockedSites.split(',')
                     .map(site => new Site(site))
-                    .map(site => site.url === request.lock.url ? new Site(site.isLocked ? site.url : `^l${Site.toUrlString(site)}`) : site);
+                    .map(site => {
+                        if ( site.url === request.lock.url ) {
+                            site.isLocked = !site.isLocked;
+                        }
+                        return site;
+                    });
                 chrome.storage.sync.set({'blockedSites': sites.map(site => Site.toUrlString(site)).join(',')});
                 sendResponse({sites: sites});
             });
@@ -57,7 +62,12 @@ chrome.runtime.onMessage.addListener(
                 } else {
                     const sites = data.blockedSites.split(',')
                         .map(site => new Site(site))
-                        .map(site => site.url === request.disable.url ? new Site(site.isDisabled ? site.url : `^d${Site.toUrlString(site)}`) : site);
+                        .map(site => {
+                            if (site.url === request.disable.url) {
+                                site.isDisabled = !site.isDisabled;
+                            }
+                            return site;
+                        });
                     chrome.storage.sync.set({'blockedSites': sites.map(site => Site.toUrlString(site)).join(',')});
                     sendResponse({sites: sites});
                 }
