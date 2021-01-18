@@ -184,10 +184,10 @@ function setTable(items, table) {
         // Settings Tab
         if ( activeTab === 'Settings' ) {
             const iconCell = row.insertCell(0);
-            iconCell.innerHTML = `<i class="${items[i].isReddit ? 'fa fa-reddit-alien text-white' : 'fa fa-external-link-alt text-white'}"></i>`;
+            iconCell.innerHTML = `<i class="${items[i].isReddit ? 'fab fa-reddit-alien text-white' : 'fas fa-external-link-alt text-white'}"></i>`;
 
             lockCell.innerHTML = createIconButton(
-                'lock' + items[i].isReddit ? 'Reddit' : 'Sites' + items[i].url, 'fa fa-lock-open text-white'
+                'lock' + items[i].isReddit ? 'Reddit' : 'Sites' + items[i].url, 'fas fa-lock-open text-white'
             )
 
             iconCell.style.width = '40px';
@@ -200,7 +200,7 @@ function setTable(items, table) {
             // not Settings Tab
         } else {
             lockCell.innerHTML = createIconButton(
-                'lock' + activeTab + items[i].url, 'fa fa-lock text-white'
+                'lock' + activeTab + items[i].url, 'fas fa-lock text-white'
             );
 
             if ( items[i].isLocked ) {
@@ -215,8 +215,8 @@ function setTable(items, table) {
                 const disableCell = row.insertCell(2);
                 const deleteCell = row.insertCell(3);
 
-                disableCell.innerHTML = createIconButton('disable' + activeTab + items[i].url, items[i].isDisabled ? 'fa fa-check text-primary' : 'fa fa-ban text-warning');
-                deleteCell.innerHTML = createIconButton('delete' + activeTab + items[i].url, 'fa fa-trash text-danger');
+                disableCell.innerHTML = createIconButton('disable' + activeTab + items[i].url, items[i].isDisabled ? 'fas fa-check text-primary' : 'fas fa-ban text-warning');
+                deleteCell.innerHTML = createIconButton('delete' + activeTab + items[i].url, 'fas fa-trash text-danger');
 
                 contentCell.style.width = '280px';
                 lockCell.style.width = '40px';
