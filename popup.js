@@ -121,7 +121,7 @@ function setClasses(darkMode) {
 }
 
 // Create an icon button
-function createIconButton(id, iconClassList=[], text = null, onclick = ()=>{}, disabled = false) {
+function createIconButton(id, iconClassList=[], text = null, onclick = ()=>{}, disabled = false, tooltip=null) {
     const button = document.createElement('button');
     button.classList.add('btn', 'btn-transparent', 'btn-sm');
     if ( text != null ) {
@@ -137,6 +137,9 @@ function createIconButton(id, iconClassList=[], text = null, onclick = ()=>{}, d
         button.disabled = true;
     } else {
         button.onclick = onclick;
+    }
+    if (tooltip != null) {
+        button.setAttribute('title', tooltip);
     }
     return button;
 }
@@ -403,6 +406,7 @@ function setTable(items, table) {
                 null,
                 ()=>lock(items[i]),
                 items[i].isHidden,
+                'Lock'
             );
 
             lockCell.appendChild(lockButton);
@@ -414,7 +418,8 @@ function setTable(items, table) {
                     ['fas', 'fa-eye', textColor],
                     null,
                     ()=>hide(items[i]),
-                    false
+                    false,
+                    'Hide'
                 );
                 hideCell.append(hideButton);
                 hideCell.style.width = '40px';
@@ -431,6 +436,7 @@ function setTable(items, table) {
                 null,
                 ()=>lock(items[i]),
                 items[i].isLocked,
+                'Lock'
             );
             lockCell.appendChild(lockButton);
 
@@ -440,7 +446,8 @@ function setTable(items, table) {
                 ['fas', 'fa-eye-slash', textColor],
                 null,
                 ()=>hide(items[i]),
-                false
+                false,
+                'Hide'
             );
             hideCell.appendChild(hideButton);
 
@@ -459,7 +466,8 @@ function setTable(items, table) {
                     items[i].isDisabled ? ['fas', 'fa-check', 'text-primary'] : ['fas', 'fa-ban', 'text-warning'],
                     null,
                     ()=>disable(items[i]),
-                    false
+                    false,
+                    'Disable'
                 )
                 disableCell.appendChild(disableButton);
 
@@ -469,7 +477,8 @@ function setTable(items, table) {
                     ['fas', 'fa-trash', 'text-danger'],
                     null,
                     ()=>remove(items[i]),
-                    false
+                    false,
+                    'Delete'
                 )
                 deleteCell.appendChild(deleteButton);
 
