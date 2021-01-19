@@ -1,4 +1,55 @@
+// Classes
+class Site {
+    url;
+    isLocked = false;
+    isDisabled = false;
+    isReddit = false;
+    isHidden = false;
+
+    constructor(url, isReddit = false) {
+        this.url = url;
+        this.isReddit = isReddit;
+        if (this.url.startsWith('^h')) {
+            this.isHidden = true;
+            this.url = this.url.substr(2);
+        }
+        if (this.url.startsWith('^l')) {
+            this.isLocked = true;
+            this.url = this.url.substr(2);
+        }
+        if (this.url.startsWith('^d')) {
+            this.isDisabled = true;
+            this.url = this.url.substr(2);
+        }
+        if (this.url.startsWith('^r')) {
+            this.isReddit = true;
+            this.url = this.url.substr(2);
+        }
+    }
+}
+
+class Settings {
+    darkMode = false;
+
+    constructor(constructString) {
+        if (constructString.startsWith('^d')) {
+            this.darkMode = true;
+            constructString = constructString.substr(2);
+        }
+    }
+
+    static toConstructString(site) {
+        let str = '';
+        if ( site.darkMode ) {
+            str = '^d' + str;
+        }
+        return str;
+    }
+}
+
 // HTML Elements
+const documentBody = document.getElementById('documentBody');
+
 const tabSites = document.getElementById('tabSites');
 const sitesToggle = document.getElementById('sitesToggle');
 const addSiteButton = document.getElementById('addSiteButton');
@@ -23,8 +74,51 @@ const settingsHiddenDropdown = document.getElementById('settingsHiddenDropdown')
 const settingsHiddenCount = document.getElementById('settingsHiddenCount');
 const settingsTutorialDropdown = document.getElementById('settingsTutorialDropdown');
 const settingsTutorial = document.getElementById('settingsTutorial');
+const settingsDarkModeSwitch = document.getElementById('settingsDarkModeSwitch');
 
+let textColor = 'text-dark';
+let navInactiveClass = 'nav-button-inactive-dark';
 let activeTab = 'Sites';
+let settings = new Settings('');
+
+// Set classes depending on dark mode
+function setClasses(darkMode) {
+    textColor = darkMode ? 'text-white' : 'text-dark';
+    navInactiveClass = darkMode ? 'nav-button-inactive-dark' : 'nav-button-inactive-light';
+    if (darkMode) {
+        documentBody.classList.remove('bg-white', 'text-dark');
+        documentBody.classList.add('bg-dark', textColor);
+        sitesToggle.classList.remove('text-dark', 'nav-button-inactive-light');
+        redditToggle.classList.remove('text-dark', 'nav-button-inactive-light');
+        settingsToggle.classList.remove('text-dark', 'nav-button-inactive-light');
+    } else {
+        documentBody.classList.remove('bg-dark', 'text-white');
+        documentBody.classList.add('bg-white', textColor);
+        sitesToggle.classList.remove('text-white', 'nav-button-inactive-dark');
+        redditToggle.classList.remove('text-white', 'nav-button-inactive-dark');
+        settingsToggle.classList.remove('text-white', 'nav-button-inactive-dark');
+    }
+    sitesTable.classList.remove(darkMode ? 'table-light' : 'table-dark');
+    sitesTable.classList.add(darkMode ? 'table-dark' : 'table-light');
+    redditTable.classList.remove(darkMode ? 'table-light' : 'table-dark');
+    redditTable.classList.add(darkMode ? 'table-dark' : 'table-light');
+
+    settingsLockedTable.classList.remove(darkMode ? 'table-light' : 'table-dark');
+    settingsLockedTable.classList.add(darkMode ? 'table-dark' : 'table-light');
+    settingsHiddenTable.classList.remove(darkMode ? 'table-light' : 'table-dark');
+    settingsHiddenTable.classList.add(darkMode ? 'table-dark' : 'table-light');
+
+    settingsLockedDropdown.classList.remove(darkMode ? 'text-dark' : 'text-white');
+    settingsHiddenDropdown.classList.remove(darkMode ? 'text-dark' : 'text-white');
+    settingsTutorialDropdown.classList.remove(darkMode ? 'text-dark' : 'text-white');
+    settingsLockedDropdown.classList.add(textColor);
+    settingsHiddenDropdown.classList.add(textColor);
+    settingsTutorialDropdown.classList.add(textColor);
+
+    sitesToggle.classList.add(textColor, navInactiveClass);
+    redditToggle.classList.add(textColor, navInactiveClass);
+    settingsToggle.classList.add(textColor, navInactiveClass);
+}
 
 // Create an icon button
 function createIconButton(id, iconClassList=[], text = null, onclick = ()=>{}, disabled = false) {
@@ -45,20 +139,6 @@ function createIconButton(id, iconClassList=[], text = null, onclick = ()=>{}, d
         button.onclick = onclick;
     }
     return button;
-}
-
-// Create an Icon Button (table) and return the HTML string
-function createIconButtonString(id, iconClass, text) {
-    if (text == null) {
-        return `<button class="btn btn-transparent btn-sm" id="${id}"><i class="${iconClass}"></i></button>`;
-    } else {
-        return `
-        <button class="btn btn-transparent btn-sm" id="${id}">
-               <span class="text-light">${text}</span>
-               <i class="${iconClass}"></i>
-        </button>
-        `;
-    }
 }
 
 // Add Input Error
@@ -109,6 +189,20 @@ function loadSites(table, filter = (site => true)) {
     });
 }
 
+// Save settings
+function saveSettings() {
+    chrome.storage.sync.set({'settings': Settings.toConstructString(settings)});
+}
+
+// Load Settings Object
+function loadSettings() {
+    chrome.storage.sync.get('siteblockSettings', function (data) {
+        if (data.siteblockSettings != null) {
+            settings = new Settings(data.siteblockSettings);
+        }
+    });
+}
+
 // Add Site Button
 addSiteButton.onclick = function () {
     addSite(new Site(siteInput.value));
@@ -138,11 +232,11 @@ function toggleTab(tab, button, tabName) {
     [tabSites, tabReddit, tabSettings].filter(t => t !== tab).forEach(t => t.hidden = true);
     [sitesToggle, redditToggle, settingsToggle].filter(t => t !== button).forEach(t => {
         t.disabled = false;
-        t.classList.add('nav-button-inactive');
+        t.classList.add(navInactiveClass);
     });
     tab.hidden = false;
     button.disabled = true;
-    button.classList.remove('nav-button-inactive');
+    button.classList.remove(navInactiveClass);
     activeTab = tabName;
 }
 
@@ -200,6 +294,14 @@ let settingsTutorialOpen = false;
 settingsTutorial.hidden = true;
 settingsTutorialDropdown.onclick = function () {
     settingsTutorialOpen = toggleDropdown(settingsTutorialDropdown, settingsTutorial, settingsTutorialOpen);
+}
+
+// Dark mode onclick
+settingsDarkModeSwitch.onclick = () => {
+    settings.darkMode = settingsDarkModeSwitch.checked;
+    saveSettings();
+    setClasses(settings.darkMode);
+    toggleTab(tabSettings, settingsToggle, 'Settings')
 }
 
 // lock a site
@@ -288,12 +390,12 @@ function setTable(items, table) {
         // Settings Tab
         if (activeTab === 'Settings') {
             const iconCell = row.insertCell(0);
-            iconCell.innerHTML = `<i class="${items[i].isReddit ? 'fab fa-reddit-alien text-white' : 'fas fa-external-link-alt text-white'}"></i>`;
+            iconCell.innerHTML = `<i class="${items[i].isReddit ? 'fab fa-reddit-alien' : 'fas fa-external-link-alt'} ${textColor}"></i>`;
             iconCell.style.lineHeight = '1.6';
 
             const lockButton = createIconButton(
                 'lock' + (items[i].isReddit ? 'Reddit' : 'Sites') + items[i].url,
-                ['fas', items[i].isHidden ? 'fa-lock' : 'fa-lock-open', 'text-white'],
+                ['fas', items[i].isHidden ? 'fa-lock' : 'fa-lock-open', textColor],
                 null,
                 ()=>lock(items[i]),
                 items[i].isHidden,
@@ -305,7 +407,7 @@ function setTable(items, table) {
                 const hideCell = row.insertCell(2);
                 const hideButton = createIconButton(
                     'hide' + (items[i].isReddit ? 'Reddit' : 'Sites') + items[i].url,
-                    ['fas', 'fa-eye', 'text-white'],
+                    ['fas', 'fa-eye', textColor],
                     null,
                     ()=>hide(items[i]),
                     false
@@ -321,7 +423,7 @@ function setTable(items, table) {
         } else {
             const lockButton = createIconButton(
                 'lock' + (items[i].isReddit ? 'Reddit' : 'Sites') + items[i].url,
-                ['fas', 'fa-lock', 'text-white'],
+                ['fas', 'fa-lock', textColor],
                 null,
                 ()=>lock(items[i]),
                 items[i].isLocked,
@@ -331,7 +433,7 @@ function setTable(items, table) {
             const hideCell = row.insertCell(1);
             const hideButton = createIconButton(
                 'hide' + (items[i].isReddit ? 'Reddit' : 'Sites') + items[i].url,
-                ['fas', 'fa-eye-slash', 'text-white'],
+                ['fas', 'fa-eye-slash', textColor],
                 null,
                 ()=>hide(items[i]),
                 false
@@ -378,38 +480,7 @@ function setTable(items, table) {
 }
 
 // Load sites at init of popup
+loadSettings();
 loadSites(sitesTable, (site => !site.isReddit && !site.isHidden));
-
-class Site {
-    url;
-    isLocked = false;
-    isDisabled = false;
-    isReddit = false;
-    isHidden = false;
-
-    constructor(url, isReddit = false) {
-        this.url = url;
-        this.isReddit = isReddit;
-        if (this.url.startsWith('^h')) {
-            this.isHidden = true;
-            this.url = this.url.substr(2);
-        }
-        if (this.url.startsWith('^l')) {
-            this.isLocked = true;
-            this.url = this.url.substr(2);
-        }
-        if (this.url.startsWith('^d')) {
-            this.isDisabled = true;
-            this.url = this.url.substr(2);
-        }
-        if (this.url.startsWith('^r')) {
-            this.isReddit = true;
-            this.url = this.url.substr(2);
-        }
-    }
-}
-
-class Settings {
-    blockedSites;
-    blockedReddits;
-}
+setClasses(settings.darkMode);
+toggleTab(tabSites, sitesToggle, 'Sites');

@@ -5,7 +5,13 @@
     border-radius: 1px;
 }
 
-.nav-button-inactive {
+.nav-button-inactive-light {
+    background-color: #e6e6e6 !important;
+    border-bottom: hidden !important;
+    border-top: solid 2px #3b3b3b !important;
+}
+
+.nav-button-inactive-dark {
     background-color: #1a1e21 !important;
     border-bottom: hidden !important;
     border-top: solid 2px #3b3b3b !important;
@@ -21,7 +27,7 @@
 }
 
 .input-error {
-    box-shadow: 0 0 10px red;
+    box-shadow: 0 0 10px #F93154;
 }
 
 .center {
