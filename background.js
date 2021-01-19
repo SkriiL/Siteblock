@@ -46,7 +46,7 @@ chrome.runtime.onMessage.addListener(
                 const sites = data.blockedSites.split(',')
                     .map(site => new Site(site))
                     .map(site => {
-                        if ( site.url === request.lock.url ) {
+                        if (site.url === request.lock.url) {
                             site.isLocked = !site.isLocked;
                         }
                         return site;
@@ -72,6 +72,20 @@ chrome.runtime.onMessage.addListener(
                     sendResponse({sites: sites});
                 }
             });
+            // Hide request from popup.js
+        } else if (request.hide != null) {
+            chrome.storage.sync.get('blockedSites', function (data) {
+                const sites = data.blockedSites.split(',')
+                    .map(site => new Site(site))
+                    .map(site => {
+                        if (site.url === request.hide.url) {
+                            site.isHidden = !site.isHidden;
+                        }
+                        return site;
+                    });
+                chrome.storage.sync.set({'blockedSites': sites.map(site => Site.toUrlString(site)).join(',')});
+                sendResponse({sites: sites});
+            });
         } else {
             sendResponse({error: 'Unknown command'});
         }
@@ -84,10 +98,15 @@ class Site {
     isLocked = false;
     isDisabled = false;
     isReddit = false;
+    isHidden = false;
 
     constructor(url, isReddit = false) {
         this.url = url;
         this.isReddit = isReddit;
+        if (this.url.startsWith('^h')) {
+            this.isHidden = true;
+            this.url = this.url.substr(2);
+        }
         if (this.url.startsWith('^l')) {
             this.isLocked = true;
             this.url = this.url.substr(2);
@@ -112,6 +131,9 @@ class Site {
         }
         if (site.isLocked) {
             url = '^l' + url;
+        }
+        if (site.isHidden) {
+            url = '^h' + url;
         }
         return url;
     }
