@@ -171,7 +171,11 @@ function addSite(site) {
         if (response.error != null) {
             console.error(response.error);
         } else if (response.sites != null) {
-            siteInput.value = '';
+            if (site.isReddit) {
+                redditInput.value = '';
+            } else {
+                siteInput.value = '';
+            }
             setTable(response.sites.filter(s => s.isReddit === site.isReddit && !s.isHidden), site.isReddit ? redditTable : sitesTable);
         }
     });
