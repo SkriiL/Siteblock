@@ -138,3 +138,23 @@ class Site {
         return url;
     }
 }
+
+class Settings {
+    darkMode = false;
+
+    constructor(constructString) {
+        if (constructString.startsWith('^d')) {
+            this.darkMode = true;
+            constructString = constructString.substr(2);
+        }
+    }
+
+    static toConstructString(site) {
+        let str = '';
+        if ( site.darkMode ) {
+            str = '^d' + str;
+        }
+        return str;
+    }
+
+}
