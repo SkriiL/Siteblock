@@ -26,8 +26,29 @@ const settingsTutorial = document.getElementById('settingsTutorial');
 
 let activeTab = 'Sites';
 
-// Create an Icon Button (table)
-function createIconButton(id, iconClass, text) {
+// Create an icon button
+function createIconButton(id, iconClassList=[], text = null, onclick = ()=>{}, disabled = false) {
+    const button = document.createElement('button');
+    button.classList.add('btn', 'btn-transparent', 'btn-sm');
+    if ( text != null ) {
+        const span = document.createElement('span');
+        span.innerHTML = text;
+        span.classList.add('text-light');
+        button.appendChild(span);
+    }
+    const icon = document.createElement('i');
+    iconClassList.forEach(cls => icon.classList.add(cls));
+    button.appendChild(icon);
+    if ( disabled ) {
+        button.disabled = true;
+    } else {
+        button.onclick = onclick;
+    }
+    return button;
+}
+
+// Create an Icon Button (table) and return the HTML string
+function createIconButtonString(id, iconClass, text) {
     if (text == null) {
         return `<button class="btn btn-transparent btn-sm" id="${id}"><i class="${iconClass}"></i></button>`;
     } else {
@@ -242,9 +263,15 @@ function setTable(items, table) {
     }
 
     if (table === settingsLockedTable) {
+        if (items.length === 0) {
+            toggleDropdown(settingsLockedDropdown, settingsLockedTable, true)
+        }
         settingsLockedDropdown.disabled = items.length === 0;
         settingsLockedCount.innerHTML = items.length.toString();
     } else if (table === settingsHiddenTable) {
+        if (items.length === 0) {
+            toggleDropdown(settingsHiddenDropdown, settingsHiddenTable, true)
+        }
         settingsHiddenDropdown.disabled = items.length === 0;
         settingsHiddenCount.innerHTML = items.length.toString();
     }
@@ -254,9 +281,9 @@ function setTable(items, table) {
 
         const contentCell = row.insertCell(0);
         contentCell.style.lineHeight = '1.6';
-        const lockCell = row.insertCell(1);
-
         contentCell.innerHTML = items[i].url;
+
+        const lockCell = row.insertCell(1);
 
         // Settings Tab
         if (activeTab === 'Settings') {
@@ -264,26 +291,27 @@ function setTable(items, table) {
             iconCell.innerHTML = `<i class="${items[i].isReddit ? 'fab fa-reddit-alien text-white' : 'fas fa-external-link-alt text-white'}"></i>`;
             iconCell.style.lineHeight = '1.6';
 
-            lockCell.innerHTML = createIconButton(
+            const lockButton = createIconButton(
                 'lock' + (items[i].isReddit ? 'Reddit' : 'Sites') + items[i].url,
-                `fas ${items[i].isHidden ? 'fa-lock' : 'fa-lock-open'} text-white`
-            )
+                ['fas', items[i].isHidden ? 'fa-lock' : 'fa-lock-open', 'text-white'],
+                null,
+                ()=>lock(items[i]),
+                items[i].isHidden,
+            );
 
-            const lockButton = document.getElementById('lock' + (items[i].isReddit ? 'Reddit' : 'Sites') + items[i].url)
-            lockButton.disabled = items[i].isHidden;
-            lockButton.onclick = function () {
-                lock(items[i]);
-            };
+            lockCell.appendChild(lockButton);
 
             if (items[i].isHidden) {
                 const hideCell = row.insertCell(2);
-                hideCell.innerHTML = createIconButton(
-                    'hide' + (items[i].isReddit ? 'Reddit' : 'Sites') + items[i].url, 'fas fa-eye text-white'
+                const hideButton = createIconButton(
+                    'hide' + (items[i].isReddit ? 'Reddit' : 'Sites') + items[i].url,
+                    ['fas', 'fa-eye', 'text-white'],
+                    null,
+                    ()=>hide(items[i]),
+                    false
                 );
+                hideCell.append(hideButton);
                 hideCell.style.width = '40px';
-                document.getElementById('hide' + (items[i].isReddit ? 'Reddit' : 'Sites') + items[i].url).onclick = function () {
-                    hide(items[i]);
-                };
             }
 
             iconCell.style.width = '40px';
@@ -291,12 +319,24 @@ function setTable(items, table) {
             lockCell.style.width = '40px';
             // not Settings Tab
         } else {
-            lockCell.innerHTML = createIconButton(
-                'lock' + (items[i].isReddit ? 'Reddit' : 'Sites') + items[i].url, 'fas fa-lock text-white'
+            const lockButton = createIconButton(
+                'lock' + (items[i].isReddit ? 'Reddit' : 'Sites') + items[i].url,
+                ['fas', 'fa-lock', 'text-white'],
+                null,
+                ()=>lock(items[i]),
+                items[i].isLocked,
             );
+            lockCell.appendChild(lockButton);
 
             const hideCell = row.insertCell(1);
-            hideCell.innerHTML = createIconButton('hide' + (items[i].isReddit ? 'Reddit' : 'Sites') + items[i].url, 'fas fa-eye-slash text-white')
+            const hideButton = createIconButton(
+                'hide' + (items[i].isReddit ? 'Reddit' : 'Sites') + items[i].url,
+                ['fas', 'fa-eye-slash', 'text-white'],
+                null,
+                ()=>hide(items[i]),
+                false
+            );
+            hideCell.appendChild(hideButton);
 
             if (items[i].isLocked) {
                 const fill1 = row.insertCell(2);
@@ -306,33 +346,33 @@ function setTable(items, table) {
                 lockCell.style.width = '40px';
                 fill1.style.width = '0';
                 fill2.style.width = '0';
-                document.getElementById('lock' + (items[i].isReddit ? 'Reddit' : 'Sites') + items[i].url).disabled = true;
             } else {
                 const disableCell = row.insertCell(2);
-                const deleteCell = row.insertCell(3);
+                const disableButton = createIconButton(
+                    'disable' + (items[i].isReddit ? 'Reddit' : 'Sites') + items[i].url,
+                    items[i].isDisabled ? ['fas', 'fa-check', 'text-primary'] : ['fas', 'fa-ban', 'text-warning'],
+                    null,
+                    ()=>disable(items[i]),
+                    false
+                )
+                disableCell.appendChild(disableButton);
 
-                disableCell.innerHTML = createIconButton('disable' + (items[i].isReddit ? 'Reddit' : 'Sites') + items[i].url, items[i].isDisabled ? 'fas fa-check text-primary' : 'fas fa-ban text-warning');
-                deleteCell.innerHTML = createIconButton('delete' + (items[i].isReddit ? 'Reddit' : 'Sites') + items[i].url, 'fas fa-trash text-danger');
+                const deleteCell = row.insertCell(3);
+                const deleteButton = createIconButton(
+                    'delete' + (items[i].isReddit ? 'Reddit' : 'Sites') + items[i].url,
+                    ['fas', 'fa-trash', 'text-danger'],
+                    null,
+                    ()=>disable(remove[i]),
+                    false
+                )
+                deleteCell.appendChild(deleteButton);
 
                 contentCell.style.width = '240px';
                 hideCell.style.width = '40px';
                 lockCell.style.width = '40px';
                 disableCell.style.width = '40px';
                 deleteCell.style.width = '40px';
-
-                document.getElementById('disable' + (items[i].isReddit ? 'Reddit' : 'Sites') + items[i].url).onclick = function () {
-                    disable(items[i]);
-                };
-                document.getElementById('delete' + (items[i].isReddit ? 'Reddit' : 'Sites') + items[i].url).onclick = function () {
-                    remove(items[i]);
-                };
-                document.getElementById('lock' + (items[i].isReddit ? 'Reddit' : 'Sites') + items[i].url).onclick = function () {
-                    lock(items[i]);
-                };
             }
-            document.getElementById('hide' + (items[i].isReddit ? 'Reddit' : 'Sites') + items[i].url).onclick = function () {
-                hide(items[i]);
-            };
         }
     }
 }
