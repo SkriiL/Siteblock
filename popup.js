@@ -464,7 +464,7 @@ function setTable(items, table) {
                     'delete' + (items[i].isReddit ? 'Reddit' : 'Sites') + items[i].url,
                     ['fas', 'fa-trash', 'text-danger'],
                     null,
-                    ()=>disable(remove[i]),
+                    ()=>remove(items[i]),
                     false
                 )
                 deleteCell.appendChild(deleteButton);
