@@ -84,6 +84,8 @@ const settingsTutorialDropdown = document.getElementById('settingsTutorialDropdo
 const settingsTutorial = document.getElementById('settingsTutorial');
 const settingsDarkModeSwitch = document.getElementById('settingsDarkModeSwitch');
 const settingsSyncSwitch = document.getElementById('settingsSyncSwitch');
+const settingsSyncLearnMore = document.getElementById('settingsSyncLearnMore');
+const settingsSyncLearnMoreContent = document.getElementById('settingsSyncLearnMoreContent');
 
 let textColor = 'text-dark';
 let navInactiveClass = 'nav-button-inactive-dark';
@@ -257,6 +259,14 @@ redditInput.oninput = (event) => {
     if (redditErrorText.hidden === false && event.data != null && event.data.length > 0) {
         removeInputError(redditInput, redditErrorText);
     }
+}
+
+// open learn more
+settingsSyncLearnMore.onmouseover = () => {
+    settingsSyncLearnMoreContent.hidden = false;
+}
+settingsSyncLearnMore.onmouseleave = () => {
+    settingsSyncLearnMoreContent.hidden = true;
 }
 
 // Tab toggle
