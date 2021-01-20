@@ -86,6 +86,16 @@ chrome.runtime.onMessage.addListener(
                 chrome.storage.sync.set({'blockedSites': sites.map(site => Site.toUrlString(site)).join(',')});
                 sendResponse({sites: sites});
             });
+        } else if (request.getSettings != null) {
+            chrome.storage.sync.get('siteblockSettings', function (data) {
+                if (data.siteblockSettings != null) {
+                    settings = new Settings(data.siteblockSettings);
+                    sendResponse({settings: settings});
+                }
+            });
+        } else if (request.setting != null) {
+            chrome.storage.sync.set({'siteblockSettings': Settings.toConstructString(request.setting)});
+            sendResponse(request.setting);
         } else {
             sendResponse({error: 'Unknown command'});
         }

@@ -186,28 +186,33 @@ function addSite(site) {
 
 // Load all blocked sites
 function loadSites(table, filter = (site => true)) {
-    chrome.storage.sync.get('blockedSites', function (data) {
-        if (data.blockedSites != null) {
-            const sites = data.blockedSites.split(',').map(site => new Site(site)).filter(filter);
-            setTable(sites, table);
-        } else {
-            settingsLockedDropdown.disabled = true;
+    chrome.runtime.sendMessage({getSites: true}, function(response) {
+        if (response.error != null) {
+            console.error(response.error);
+        } else if (response.sites != null) {
+            setTable(response.sites.filter(filter), table);
         }
     });
 }
 
 // Save settings
 function saveSettings() {
-    chrome.storage.sync.set({'settings': Settings.toConstructString(settings)});
+    chrome.runtime.sendMessage({setting: settings}, (response)=>{
+        if (response.error != null) {
+            console.error(response.error);
+        }
+    });
 }
 
 // Load Settings Object
 function loadSettings() {
-    chrome.storage.sync.get('siteblockSettings', function (data) {
-        if (data.siteblockSettings != null) {
-            settings = new Settings(data.siteblockSettings);
+    chrome.runtime.sendMessage({getSettings: true}, function (response) {
+        if (response.error != null) {
+            console.error(response.error);
+        } else if (response.settings != null) {
+            settings = response.settings;
         }
-    });
+    })
 }
 
 // Add Site Button
