@@ -30,8 +30,13 @@ class Site {
 
 class Settings {
     darkMode = false;
+    sync = false;
 
     constructor(constructString) {
+        if (constructString.startsWith('^s')) {
+            this.sync = true;
+            constructString = constructString.substr(2);
+        }
         if (constructString.startsWith('^d')) {
             this.darkMode = true;
             constructString = constructString.substr(2);
@@ -42,6 +47,9 @@ class Settings {
         let str = '';
         if ( site.darkMode ) {
             str = '^d' + str;
+        }
+        if ( site.sync ) {
+            str = '^s' + str;
         }
         return str;
     }
@@ -75,6 +83,7 @@ const settingsHiddenCount = document.getElementById('settingsHiddenCount');
 const settingsTutorialDropdown = document.getElementById('settingsTutorialDropdown');
 const settingsTutorial = document.getElementById('settingsTutorial');
 const settingsDarkModeSwitch = document.getElementById('settingsDarkModeSwitch');
+const settingsSyncSwitch = document.getElementById('settingsSyncSwitch');
 
 let textColor = 'text-dark';
 let navInactiveClass = 'nav-button-inactive-dark';
@@ -120,6 +129,12 @@ function setClasses(darkMode) {
     settingsToggle.classList.add(textColor, navInactiveClass);
 }
 
+// set switches, buttons, inputs etc
+function setSettings() {
+    settingsDarkModeSwitch.checked = settings.darkMode;
+    settingsSyncSwitch.checked = settings.sync;
+}
+
 // Create an icon button
 function createIconButton(id, iconClassList=[], text = null, onclick = ()=>{}, disabled = false, tooltip=null) {
     const button = document.createElement('button');
@@ -146,7 +161,7 @@ function createIconButton(id, iconClassList=[], text = null, onclick = ()=>{}, d
 
 function logError(error) {
     if (error) {
-        console.log(error);
+        console.error(error);
     }
 }
 
@@ -208,10 +223,14 @@ function saveSettings() {
 
 // Load Settings Object
 function loadSettings() {
-    chrome.runtime.sendMessage({getSettings: true}, (response) => {
+    chrome.runtime.sendMessage({settings: true}, (response) => {
         logError(response.error);
         if (response.settings != null) {
             settings = response.settings;
+            setSettings();
+            setClasses(settings.darkMode);
+            loadSites(sitesTable, (site => !site.isReddit && !site.isHidden));
+            toggleTab(tabSites, sitesToggle, 'Sites');
         }
     })
 }
@@ -317,6 +336,12 @@ settingsDarkModeSwitch.onclick = () => {
     toggleTab(tabSettings, settingsToggle, 'Settings')
     loadSites(settingsHiddenTable, (site => site.isHidden));
     loadSites(settingsLockedTable, (site => site.isLocked && !site.isHidden));
+}
+
+// Sync onclick
+settingsSyncSwitch.onclick = () => {
+    settings.sync = settingsSyncSwitch.checked;
+    saveSettings();
 }
 
 // lock a site
@@ -498,6 +523,3 @@ function setTable(items, table) {
 
 // Load sites at init of popup
 loadSettings();
-loadSites(sitesTable, (site => !site.isReddit && !site.isHidden));
-setClasses(settings.darkMode);
-toggleTab(tabSites, sitesToggle, 'Sites');
