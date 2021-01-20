@@ -1,3 +1,5 @@
+let settings = new Settings('^s');
+
 chrome.runtime.onMessage.addListener(
     (request, sender, sendResponse) => {
         // Site request from content.js
@@ -86,6 +88,7 @@ chrome.runtime.onMessage.addListener(
                 chrome.storage.sync.set({'blockedSites': sites.map(site => Site.toUrlString(site)).join(',')});
                 sendResponse({sites: sites});
             });
+            // Load settings
         } else if (request.getSettings != null) {
             chrome.storage.sync.get('siteblockSettings', (data) => {
                 if (data.siteblockSettings != null) {
@@ -93,6 +96,7 @@ chrome.runtime.onMessage.addListener(
                     sendResponse({settings: settings});
                 }
             });
+            // save Settings
         } else if (request.setting != null) {
             chrome.storage.sync.set({'siteblockSettings': Settings.toConstructString(request.setting)});
             sendResponse(request.setting);
