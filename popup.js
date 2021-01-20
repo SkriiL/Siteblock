@@ -170,7 +170,7 @@ function addSite(site) {
         addInputError(siteInput, sitesErrorText, 'Sites need to contain a Top-Level-Domain (e.g. ".com").');
         return;
     }
-    chrome.runtime.sendMessage({site: site}, function (response) {
+    chrome.runtime.sendMessage({site: site}, (response) => {
         if (response.error != null) {
             console.error(response.error);
         } else if (response.sites != null) {
@@ -186,7 +186,7 @@ function addSite(site) {
 
 // Load all blocked sites
 function loadSites(table, filter = (site => true)) {
-    chrome.runtime.sendMessage({getSites: true}, function(response) {
+    chrome.runtime.sendMessage({getSites: true}, (response) => {
         if (response.error != null) {
             console.error(response.error);
         } else if (response.sites != null) {
@@ -206,7 +206,7 @@ function saveSettings() {
 
 // Load Settings Object
 function loadSettings() {
-    chrome.runtime.sendMessage({getSettings: true}, function (response) {
+    chrome.runtime.sendMessage({getSettings: true}, (response) => {
         if (response.error != null) {
             console.error(response.error);
         } else if (response.settings != null) {
@@ -216,24 +216,24 @@ function loadSettings() {
 }
 
 // Add Site Button
-addSiteButton.onclick = function () {
+addSiteButton.onclick = () => {
     addSite(new Site(siteInput.value));
 };
 
 // Add Reddit Button
-addRedditButton.onclick = function () {
+addRedditButton.onclick = () => {
     addSite(new Site(redditInput.value, true));
 };
 
 // hide 'Please enter a site to block first.'
-siteInput.oninput = function (event) {
+siteInput.oninput = (event) => {
     if (sitesErrorText.hidden === false && event.data != null && event.data.length > 0) {
         removeInputError(siteInput, sitesErrorText);
     }
 }
 
 // hide 'Please enter a Reddit to block first.'
-redditInput.oninput = function (event) {
+redditInput.oninput = (event) => {
     if (redditErrorText.hidden === false && event.data != null && event.data.length > 0) {
         removeInputError(redditInput, redditErrorText);
     }
@@ -253,19 +253,19 @@ function toggleTab(tab, button, tabName) {
 }
 
 // Sites Tab Toggle
-sitesToggle.onclick = function () {
+sitesToggle.onclick = () => {
     toggleTab(tabSites, sitesToggle, 'Sites');
     loadSites(sitesTable, (site => !site.isReddit && !site.isHidden));
 };
 
 // Reddit Tab toggle
-redditToggle.onclick = function () {
+redditToggle.onclick = () => {
     toggleTab(tabReddit, redditToggle, 'Reddit');
     loadSites(redditTable, (site => site.isReddit && !site.isHidden));
 };
 
 // Settings Tab toggle
-settingsToggle.onclick = function () {
+settingsToggle.onclick = () => {
     toggleTab(tabSettings, settingsToggle, 'Settings');
     loadSites(settingsHiddenTable, (site => site.isHidden));
     loadSites(settingsLockedTable, (site => site.isLocked && !site.isHidden));
@@ -290,21 +290,21 @@ function toggleDropdown(dropdown, content, isOpen) {
 // Locked sites dropdown toggle
 let settingsLockedOpen = false;
 settingsLockedTable.hidden = true;
-settingsLockedDropdown.onclick = function () {
+settingsLockedDropdown.onclick = () => {
     settingsLockedOpen = toggleDropdown(settingsLockedDropdown, settingsLockedTable, settingsLockedOpen);
 }
 
 // hidden sites dropdown toggle
 let settingsHiddenOpen = false;
 settingsHiddenTable.hidden = true;
-settingsHiddenDropdown.onclick = function () {
+settingsHiddenDropdown.onclick = () => {
     settingsHiddenOpen = toggleDropdown(settingsHiddenDropdown, settingsHiddenTable, settingsHiddenOpen);
 }
 
 // Tutorial dropdown toggle
 let settingsTutorialOpen = false;
 settingsTutorial.hidden = true;
-settingsTutorialDropdown.onclick = function () {
+settingsTutorialDropdown.onclick = () => {
     settingsTutorialOpen = toggleDropdown(settingsTutorialDropdown, settingsTutorial, settingsTutorialOpen);
 }
 
@@ -318,7 +318,7 @@ settingsDarkModeSwitch.onclick = () => {
 
 // lock a site
 function lock(site) {
-    chrome.runtime.sendMessage({lock: site}, function (response) {
+    chrome.runtime.sendMessage({lock: site}, (response) => {
         if (response.error != null) {
             console.error(response.error);
         } else if (response.sites != null) {
@@ -333,7 +333,7 @@ function lock(site) {
 
 // disable a site
 function disable(site) {
-    chrome.runtime.sendMessage({disable: site}, function (response) {
+    chrome.runtime.sendMessage({disable: site}, (response) => {
         if (response.error != null) {
             console.error(response.error);
         } else if (response.sites != null) {
@@ -344,7 +344,7 @@ function disable(site) {
 
 // remove a site
 function remove(site) {
-    chrome.runtime.sendMessage({delete: site}, function (response) {
+    chrome.runtime.sendMessage({delete: site}, (response) => {
         if (response.error != null) {
             console.error(response.error);
         } else if (response.sites != null) {
@@ -355,7 +355,7 @@ function remove(site) {
 
 // hide a site
 function hide(site) {
-    chrome.runtime.sendMessage({hide: site}, function (response) {
+    chrome.runtime.sendMessage({hide: site}, (response) => {
         if (response.error != null) {
             console.error(response.error);
         } else if (response.sites != null) {
