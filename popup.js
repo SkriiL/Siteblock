@@ -144,6 +144,12 @@ function createIconButton(id, iconClassList=[], text = null, onclick = ()=>{}, d
     return button;
 }
 
+function logError(error) {
+    if (error) {
+        console.log(error);
+    }
+}
+
 // Add Input Error
 function addInputError(input, errorText, value) {
     errorText.innerHTML = value;
@@ -171,9 +177,8 @@ function addSite(site) {
         return;
     }
     chrome.runtime.sendMessage({site: site}, (response) => {
-        if (response.error != null) {
-            console.error(response.error);
-        } else if (response.sites != null) {
+        logError(response.error);
+        if (response.sites != null) {
             if (site.isReddit) {
                 redditInput.value = '';
             } else {
@@ -187,9 +192,8 @@ function addSite(site) {
 // Load all blocked sites
 function loadSites(table, filter = (site => true)) {
     chrome.runtime.sendMessage({getSites: true}, (response) => {
-        if (response.error != null) {
-            console.error(response.error);
-        } else if (response.sites != null) {
+        logError(response.error);
+        if (response.sites != null) {
             setTable(response.sites.filter(filter), table);
         }
     });
@@ -198,18 +202,15 @@ function loadSites(table, filter = (site => true)) {
 // Save settings
 function saveSettings() {
     chrome.runtime.sendMessage({setting: settings}, (response)=>{
-        if (response.error != null) {
-            console.error(response.error);
-        }
+        logError(response.error);
     });
 }
 
 // Load Settings Object
 function loadSettings() {
     chrome.runtime.sendMessage({getSettings: true}, (response) => {
-        if (response.error != null) {
-            console.error(response.error);
-        } else if (response.settings != null) {
+        logError(response.error);
+        if (response.settings != null) {
             settings = response.settings;
         }
     })
@@ -319,9 +320,8 @@ settingsDarkModeSwitch.onclick = () => {
 // lock a site
 function lock(site) {
     chrome.runtime.sendMessage({lock: site}, (response) => {
-        if (response.error != null) {
-            console.error(response.error);
-        } else if (response.sites != null) {
+        logError(response.error);
+        if (response.sites != null) {
             if (activeTab === 'Settings') {
                 setTable(response.sites.filter(s => s.isLocked && !s.isHidden), settingsLockedTable);
             } else {
@@ -334,9 +334,8 @@ function lock(site) {
 // disable a site
 function disable(site) {
     chrome.runtime.sendMessage({disable: site}, (response) => {
-        if (response.error != null) {
-            console.error(response.error);
-        } else if (response.sites != null) {
+        logError(response.error);
+        if (response.sites != null) {
             setTable(response.sites.filter(s => s.isReddit === site.isReddit && !s.isHidden), site.isReddit ? redditTable : sitesTable);
         }
     })
@@ -345,9 +344,8 @@ function disable(site) {
 // remove a site
 function remove(site) {
     chrome.runtime.sendMessage({delete: site}, (response) => {
-        if (response.error != null) {
-            console.error(response.error);
-        } else if (response.sites != null) {
+        logError(response.error);
+        if (response.sites != null) {
             setTable(response.sites.filter(s => s.isReddit === site.isReddit && !s.isHidden), site.isReddit ? redditTable : sitesTable);
         }
     })
@@ -356,9 +354,8 @@ function remove(site) {
 // hide a site
 function hide(site) {
     chrome.runtime.sendMessage({hide: site}, (response) => {
-        if (response.error != null) {
-            console.error(response.error);
-        } else if (response.sites != null) {
+        logError(response.error);
+        if (response.sites != null) {
             if (activeTab === 'Settings') {
                 setTable(response.sites.filter(s => s.isHidden), settingsHiddenTable);
                 setTable(response.sites.filter(s => s.isLocked && !s.isHidden), settingsLockedTable);
