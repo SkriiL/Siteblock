@@ -144,6 +144,12 @@ function createIconButton(id, iconClassList=[], text = null, onclick = ()=>{}, d
     return button;
 }
 
+function logError(error) {
+    if (error) {
+        console.log(error);
+    }
+}
+
 // Add Input Error
 function addInputError(input, errorText, value) {
     errorText.innerHTML = value;
@@ -170,10 +176,9 @@ function addSite(site) {
         addInputError(siteInput, sitesErrorText, 'Sites need to contain a Top-Level-Domain (e.g. ".com").');
         return;
     }
-    chrome.runtime.sendMessage({site: site}, function (response) {
-        if (response.error != null) {
-            console.error(response.error);
-        } else if (response.sites != null) {
+    chrome.runtime.sendMessage({site: site}, (response) => {
+        logError(response.error);
+        if (response.sites != null) {
             if (site.isReddit) {
                 redditInput.value = '';
             } else {
@@ -186,49 +191,50 @@ function addSite(site) {
 
 // Load all blocked sites
 function loadSites(table, filter = (site => true)) {
-    chrome.storage.sync.get('blockedSites', function (data) {
-        if (data.blockedSites != null) {
-            const sites = data.blockedSites.split(',').map(site => new Site(site)).filter(filter);
-            setTable(sites, table);
-        } else {
-            settingsLockedDropdown.disabled = true;
+    chrome.runtime.sendMessage({getSites: true}, (response) => {
+        logError(response.error);
+        if (response.sites != null) {
+            setTable(response.sites.filter(filter), table);
         }
     });
 }
 
 // Save settings
 function saveSettings() {
-    chrome.storage.sync.set({'settings': Settings.toConstructString(settings)});
+    chrome.runtime.sendMessage({setting: settings}, (response)=>{
+        logError(response.error);
+    });
 }
 
 // Load Settings Object
 function loadSettings() {
-    chrome.storage.sync.get('siteblockSettings', function (data) {
-        if (data.siteblockSettings != null) {
-            settings = new Settings(data.siteblockSettings);
+    chrome.runtime.sendMessage({getSettings: true}, (response) => {
+        logError(response.error);
+        if (response.settings != null) {
+            settings = response.settings;
         }
-    });
+    })
 }
 
 // Add Site Button
-addSiteButton.onclick = function () {
+addSiteButton.onclick = () => {
     addSite(new Site(siteInput.value));
 };
 
 // Add Reddit Button
-addRedditButton.onclick = function () {
+addRedditButton.onclick = () => {
     addSite(new Site(redditInput.value, true));
 };
 
 // hide 'Please enter a site to block first.'
-siteInput.oninput = function (event) {
+siteInput.oninput = (event) => {
     if (sitesErrorText.hidden === false && event.data != null && event.data.length > 0) {
         removeInputError(siteInput, sitesErrorText);
     }
 }
 
 // hide 'Please enter a Reddit to block first.'
-redditInput.oninput = function (event) {
+redditInput.oninput = (event) => {
     if (redditErrorText.hidden === false && event.data != null && event.data.length > 0) {
         removeInputError(redditInput, redditErrorText);
     }
@@ -248,19 +254,19 @@ function toggleTab(tab, button, tabName) {
 }
 
 // Sites Tab Toggle
-sitesToggle.onclick = function () {
+sitesToggle.onclick = () => {
     toggleTab(tabSites, sitesToggle, 'Sites');
     loadSites(sitesTable, (site => !site.isReddit && !site.isHidden));
 };
 
 // Reddit Tab toggle
-redditToggle.onclick = function () {
+redditToggle.onclick = () => {
     toggleTab(tabReddit, redditToggle, 'Reddit');
     loadSites(redditTable, (site => site.isReddit && !site.isHidden));
 };
 
 // Settings Tab toggle
-settingsToggle.onclick = function () {
+settingsToggle.onclick = () => {
     toggleTab(tabSettings, settingsToggle, 'Settings');
     loadSites(settingsHiddenTable, (site => site.isHidden));
     loadSites(settingsLockedTable, (site => site.isLocked && !site.isHidden));
@@ -285,21 +291,21 @@ function toggleDropdown(dropdown, content, isOpen) {
 // Locked sites dropdown toggle
 let settingsLockedOpen = false;
 settingsLockedTable.hidden = true;
-settingsLockedDropdown.onclick = function () {
+settingsLockedDropdown.onclick = () => {
     settingsLockedOpen = toggleDropdown(settingsLockedDropdown, settingsLockedTable, settingsLockedOpen);
 }
 
 // hidden sites dropdown toggle
 let settingsHiddenOpen = false;
 settingsHiddenTable.hidden = true;
-settingsHiddenDropdown.onclick = function () {
+settingsHiddenDropdown.onclick = () => {
     settingsHiddenOpen = toggleDropdown(settingsHiddenDropdown, settingsHiddenTable, settingsHiddenOpen);
 }
 
 // Tutorial dropdown toggle
 let settingsTutorialOpen = false;
 settingsTutorial.hidden = true;
-settingsTutorialDropdown.onclick = function () {
+settingsTutorialDropdown.onclick = () => {
     settingsTutorialOpen = toggleDropdown(settingsTutorialDropdown, settingsTutorial, settingsTutorialOpen);
 }
 
@@ -309,14 +315,15 @@ settingsDarkModeSwitch.onclick = () => {
     saveSettings();
     setClasses(settings.darkMode);
     toggleTab(tabSettings, settingsToggle, 'Settings')
+    loadSites(settingsHiddenTable, (site => site.isHidden));
+    loadSites(settingsLockedTable, (site => site.isLocked && !site.isHidden));
 }
 
 // lock a site
 function lock(site) {
-    chrome.runtime.sendMessage({lock: site}, function (response) {
-        if (response.error != null) {
-            console.error(response.error);
-        } else if (response.sites != null) {
+    chrome.runtime.sendMessage({lock: site}, (response) => {
+        logError(response.error);
+        if (response.sites != null) {
             if (activeTab === 'Settings') {
                 setTable(response.sites.filter(s => s.isLocked && !s.isHidden), settingsLockedTable);
             } else {
@@ -328,10 +335,9 @@ function lock(site) {
 
 // disable a site
 function disable(site) {
-    chrome.runtime.sendMessage({disable: site}, function (response) {
-        if (response.error != null) {
-            console.error(response.error);
-        } else if (response.sites != null) {
+    chrome.runtime.sendMessage({disable: site}, (response) => {
+        logError(response.error);
+        if (response.sites != null) {
             setTable(response.sites.filter(s => s.isReddit === site.isReddit && !s.isHidden), site.isReddit ? redditTable : sitesTable);
         }
     })
@@ -339,10 +345,9 @@ function disable(site) {
 
 // remove a site
 function remove(site) {
-    chrome.runtime.sendMessage({delete: site}, function (response) {
-        if (response.error != null) {
-            console.error(response.error);
-        } else if (response.sites != null) {
+    chrome.runtime.sendMessage({delete: site}, (response) => {
+        logError(response.error);
+        if (response.sites != null) {
             setTable(response.sites.filter(s => s.isReddit === site.isReddit && !s.isHidden), site.isReddit ? redditTable : sitesTable);
         }
     })
@@ -350,10 +355,9 @@ function remove(site) {
 
 // hide a site
 function hide(site) {
-    chrome.runtime.sendMessage({hide: site}, function (response) {
-        if (response.error != null) {
-            console.error(response.error);
-        } else if (response.sites != null) {
+    chrome.runtime.sendMessage({hide: site}, (response) => {
+        logError(response.error);
+        if (response.sites != null) {
             if (activeTab === 'Settings') {
                 setTable(response.sites.filter(s => s.isHidden), settingsHiddenTable);
                 setTable(response.sites.filter(s => s.isLocked && !s.isHidden), settingsLockedTable);
@@ -402,7 +406,7 @@ function setTable(items, table) {
 
             const lockButton = createIconButton(
                 'lock' + (items[i].isReddit ? 'Reddit' : 'Sites') + items[i].url,
-                ['fas', items[i].isHidden ? 'fa-lock' : 'fa-lock-open', textColor],
+                ['fas', items[i].isLocked ? items[i].isHidden ? 'fa-lock' : 'fa-lock-open' : 'fa-lock-open', textColor],
                 null,
                 ()=>lock(items[i]),
                 items[i].isHidden,

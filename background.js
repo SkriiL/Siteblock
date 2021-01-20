@@ -1,8 +1,8 @@
 chrome.runtime.onMessage.addListener(
-    function (request, sender, sendResponse) {
+    (request, sender, sendResponse) => {
         // Site request from content.js
         if (request.getSites != null) {
-            chrome.storage.sync.get('blockedSites', function (data) {
+            chrome.storage.sync.get('blockedSites', (data) => {
                 let sites = [];
                 if (data.blockedSites != null) {
                     sites = data.blockedSites.split(',').map(site => new Site(site));
@@ -11,7 +11,7 @@ chrome.runtime.onMessage.addListener(
             });
             // Add site request from popup.js
         } else if (request.site != null) {
-            chrome.storage.sync.get('blockedSites', function (data) {
+            chrome.storage.sync.get('blockedSites', (data) => {
                 let siteStrings = [];
                 if (data.blockedSites != null) {
                     siteStrings = data.blockedSites.split(',');
@@ -29,7 +29,7 @@ chrome.runtime.onMessage.addListener(
             sendResponse({});
             // Delete request from popup.js
         } else if (request.delete != null) {
-            chrome.storage.sync.get('blockedSites', function (data) {
+            chrome.storage.sync.get('blockedSites', (data) => {
                 if (request.delete.isLocked) {
                     sendResponse({error: 'Site is locked.'})
                 } else {
@@ -42,7 +42,7 @@ chrome.runtime.onMessage.addListener(
             });
             // Lock request from popup.js
         } else if (request.lock != null) {
-            chrome.storage.sync.get('blockedSites', function (data) {
+            chrome.storage.sync.get('blockedSites', (data) => {
                 const sites = data.blockedSites.split(',')
                     .map(site => new Site(site))
                     .map(site => {
@@ -56,7 +56,7 @@ chrome.runtime.onMessage.addListener(
             });
             // Disable request from popup.js
         } else if (request.disable != null) {
-            chrome.storage.sync.get('blockedSites', function (data) {
+            chrome.storage.sync.get('blockedSites', (data) => {
                 if (request.disable.isLocked) {
                     sendResponse({error: 'Site is locked.'})
                 } else {
@@ -74,7 +74,7 @@ chrome.runtime.onMessage.addListener(
             });
             // Hide request from popup.js
         } else if (request.hide != null) {
-            chrome.storage.sync.get('blockedSites', function (data) {
+            chrome.storage.sync.get('blockedSites', (data) => {
                 const sites = data.blockedSites.split(',')
                     .map(site => new Site(site))
                     .map(site => {
@@ -86,6 +86,16 @@ chrome.runtime.onMessage.addListener(
                 chrome.storage.sync.set({'blockedSites': sites.map(site => Site.toUrlString(site)).join(',')});
                 sendResponse({sites: sites});
             });
+        } else if (request.getSettings != null) {
+            chrome.storage.sync.get('siteblockSettings', (data) => {
+                if (data.siteblockSettings != null) {
+                    settings = new Settings(data.siteblockSettings);
+                    sendResponse({settings: settings});
+                }
+            });
+        } else if (request.setting != null) {
+            chrome.storage.sync.set({'siteblockSettings': Settings.toConstructString(request.setting)});
+            sendResponse(request.setting);
         } else {
             sendResponse({error: 'Unknown command'});
         }

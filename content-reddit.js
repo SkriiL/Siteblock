@@ -1,4 +1,4 @@
-chrome.runtime.sendMessage({ getSites: true }, function (response) {
+chrome.runtime.sendMessage({ getSites: true }, (response) => {
     if ( response.error != null ) {
         console.error(response.error);
     } else if ( response.sites != null ) {
@@ -13,7 +13,7 @@ function isBlocked(reddits) {
             const regexString = `^(http:\/\/)?(https:\/\/)?(www\.)?reddit\.com\/(r|user)\/${reddit.url}.*`;
             const regex = new RegExp(regexString);
             if (regex.test(window.location.href)) {
-                chrome.runtime.sendMessage({ url: 'https://reddit.com' }, function (response) {
+                chrome.runtime.sendMessage({ url: 'https://reddit.com' }, (response) => {
                     if ( response.error != null ) {
                         console.error(response.error);
                     }

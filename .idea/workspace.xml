@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="d5b92b07-44cf-4a25-af3a-05f6b1fbba0b" name="Default" comment="#37 delete bug fix">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    <list default="true" id="d5b92b07-44cf-4a25-af3a-05f6b1fbba0b" name="Default" comment="#9 anderes Lock Icon">
       <change beforePath="$PROJECT_DIR$/popup.js" beforeDir="false" afterPath="$PROJECT_DIR$/popup.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -20,7 +19,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="feature/bugs" />
+        <entry key="$PROJECT_DIR$" value="master" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -59,6 +58,7 @@
       <workItem from="1610701446184" duration="9376000" />
       <workItem from="1610736742734" duration="1480000" />
       <workItem from="1610966397049" duration="1342000" />
+      <workItem from="1611161575364" duration="1970000" />
     </task>
     <task id="LOCAL-00001" summary="#3 settings Tab WIP">
       <created>1610709019692</created>
@@ -123,7 +123,35 @@
       <option name="project" value="LOCAL" />
       <updated>1611083076004</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="#45 logErrors function">
+      <created>1611162656150</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1611162656150</updated>
+    </task>
+    <task id="LOCAL-00011" summary="#44 lambda functions">
+      <created>1611162955457</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1611162955457</updated>
+    </task>
+    <task id="LOCAL-00012" summary="#45 logError function">
+      <created>1611163122364</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1611163122364</updated>
+    </task>
+    <task id="LOCAL-00013" summary="#9 anderes Lock Icon">
+      <created>1611163410484</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1611163410484</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -139,6 +167,10 @@
     <MESSAGE value="#1 Hide Sites WIP" />
     <MESSAGE value="#27 lightmode" />
     <MESSAGE value="#37 delete bug fix" />
-    <option name="LAST_COMMIT_MESSAGE" value="#37 delete bug fix" />
+    <MESSAGE value="#45 logErrors function" />
+    <MESSAGE value="#44 lambda functions" />
+    <MESSAGE value="#45 logError function" />
+    <MESSAGE value="#9 anderes Lock Icon" />
+    <option name="LAST_COMMIT_MESSAGE" value="#9 anderes Lock Icon" />
   </component>
 </project>
