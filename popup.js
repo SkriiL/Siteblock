@@ -404,7 +404,7 @@ function setTable(items, table) {
 
             const lockButton = createIconButton(
                 'lock' + (items[i].isReddit ? 'Reddit' : 'Sites') + items[i].url,
-                ['fas', items[i].isHidden ? 'fa-lock' : 'fa-lock-open', textColor],
+                ['fas', items[i].isLocked ? items[i].isHidden ? 'fa-lock' : 'fa-lock-open' : 'fa-lock-open', textColor],
                 null,
                 ()=>lock(items[i]),
                 items[i].isHidden,
