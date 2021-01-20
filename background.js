@@ -1,5 +1,6 @@
 let settings, storage;
 
+// init settings and storage
 chrome.storage.local.get('siteblockSettings', (localData) => {
     chrome.storage.sync.get('siteblockSettings', (syncData) => {
         if (localData.siteblockSettings != null) {

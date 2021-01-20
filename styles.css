@@ -34,3 +34,16 @@
     margin-right: auto !important;
     margin-left: auto !important;
 }
+
+.text-link {
+    color: #1266F1;
+}
+
+.text-link:hover {
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.text-small {
+    font-size: smaller;
+}

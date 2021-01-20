@@ -58,12 +58,18 @@
                     <span class="slider round"></span>
                 </label>
             </div>
-            <div class="mt-3 w-75 center d-flex justify-content-between">
-                <span class="mb-1">Sync data</span>
-                <label class="switch">
-                    <input type="checkbox" id="settingsSyncSwitch">
-                    <span class="slider round"></span>
-                </label>
+            <div class="mt-3 w-75 center">
+                <div class="d-flex justify-content-between">
+                    <span class="mb-1">Sync data <span class="text-link text-small" id="settingsSyncLearnMore"> Learn more</span></span>
+                    <label class="switch">
+                        <input type="checkbox" id="settingsSyncSwitch">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div id="settingsSyncLearnMoreContent" class="text-small" hidden>
+                    If you activate this, your data will be saved in your Google account.<br>
+                    That means that your blocked sites and settings are synced on every Chrome browser you use.
+                </div>
             </div>
             <div class="mt-3 text-center">
                 <button class="btn btn-transparent mx-1 btn-dropdown w-75 text-white" id="settingsTutorialDropdown">
