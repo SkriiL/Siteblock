@@ -315,6 +315,8 @@ settingsDarkModeSwitch.onclick = () => {
     saveSettings();
     setClasses(settings.darkMode);
     toggleTab(tabSettings, settingsToggle, 'Settings')
+    loadSites(settingsHiddenTable, (site => site.isHidden));
+    loadSites(settingsLockedTable, (site => site.isLocked && !site.isHidden));
 }
 
 // lock a site
