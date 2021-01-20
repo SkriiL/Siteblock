@@ -8,6 +8,9 @@ chrome.storage.local.get('siteblockSettings', (localData) => {
         } else if (syncData.siteblockSettings != null) {
             settings = new Settings(syncData.siteblockSettings);
             storage = chrome.storage.sync;
+        } else {
+            settings = new Settings();
+            storage = chrome.storage.local;
         }
     })
 })
