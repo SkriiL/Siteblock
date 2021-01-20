@@ -1,10 +1,22 @@
-let settings = new Settings('^s');
+let settings, storage;
+
+chrome.storage.local.get('siteblockSettings', (localData) => {
+    chrome.storage.sync.get('siteblockSettings', (syncData) => {
+        if (localData.siteblockSettings != null) {
+            settings = new Settings(localData.siteblockSettings);
+            storage = chrome.storage.local;
+        } else if (syncData.siteblockSettings != null) {
+            settings = new Settings(syncData.siteblockSettings);
+            storage = chrome.storage.sync;
+        }
+    })
+})
 
 chrome.runtime.onMessage.addListener(
     (request, sender, sendResponse) => {
         // Site request from content.js
         if (request.getSites != null) {
-            chrome.storage.sync.get('blockedSites', (data) => {
+            storage.get('blockedSites', (data) => {
                 let sites = [];
                 if (data.blockedSites != null) {
                     sites = data.blockedSites.split(',').map(site => new Site(site));
@@ -13,14 +25,13 @@ chrome.runtime.onMessage.addListener(
             });
             // Add site request from popup.js
         } else if (request.site != null) {
-            chrome.storage.sync.get('blockedSites', (data) => {
+            storage.get('blockedSites', (data) => {
                 let siteStrings = [];
                 if (data.blockedSites != null) {
                     siteStrings = data.blockedSites.split(',');
                 }
-                console.log(request.site);
                 siteStrings.push(Site.toUrlString(request.site));
-                chrome.storage.sync.set({'blockedSites': siteStrings.join(',')}); // Insert '' to delete every blocked site
+                storage.set({'blockedSites': siteStrings.join(',')}); // Insert '' to delete every blocked site
                 const sites = siteStrings.map(site => new Site(site));
                 sendResponse({sites: sites});
             });
@@ -31,20 +42,20 @@ chrome.runtime.onMessage.addListener(
             sendResponse({});
             // Delete request from popup.js
         } else if (request.delete != null) {
-            chrome.storage.sync.get('blockedSites', (data) => {
+            storage.get('blockedSites', (data) => {
                 if (request.delete.isLocked) {
                     sendResponse({error: 'Site is locked.'})
                 } else {
                     const sites = data.blockedSites.split(',')
                         .map(site => new Site(site))
                         .filter(site => (site.url !== request.delete.url) || (site.isReddit !== request.delete.isReddit));
-                    chrome.storage.sync.set({'blockedSites': sites.length > 0 ? sites.map(site => Site.toUrlString(site)).join(',') : null});
+                    storage.set({'blockedSites': sites.length > 0 ? sites.map(site => Site.toUrlString(site)).join(',') : null});
                     sendResponse({sites: sites});
                 }
             });
             // Lock request from popup.js
         } else if (request.lock != null) {
-            chrome.storage.sync.get('blockedSites', (data) => {
+            storage.get('blockedSites', (data) => {
                 const sites = data.blockedSites.split(',')
                     .map(site => new Site(site))
                     .map(site => {
@@ -53,12 +64,12 @@ chrome.runtime.onMessage.addListener(
                         }
                         return site;
                     });
-                chrome.storage.sync.set({'blockedSites': sites.map(site => Site.toUrlString(site)).join(',')});
+                storage.set({'blockedSites': sites.map(site => Site.toUrlString(site)).join(',')});
                 sendResponse({sites: sites});
             });
             // Disable request from popup.js
         } else if (request.disable != null) {
-            chrome.storage.sync.get('blockedSites', (data) => {
+            storage.get('blockedSites', (data) => {
                 if (request.disable.isLocked) {
                     sendResponse({error: 'Site is locked.'})
                 } else {
@@ -70,13 +81,13 @@ chrome.runtime.onMessage.addListener(
                             }
                             return site;
                         });
-                    chrome.storage.sync.set({'blockedSites': sites.map(site => Site.toUrlString(site)).join(',')});
+                    storage.set({'blockedSites': sites.map(site => Site.toUrlString(site)).join(',')});
                     sendResponse({sites: sites});
                 }
             });
             // Hide request from popup.js
         } else if (request.hide != null) {
-            chrome.storage.sync.get('blockedSites', (data) => {
+            storage.get('blockedSites', (data) => {
                 const sites = data.blockedSites.split(',')
                     .map(site => new Site(site))
                     .map(site => {
@@ -85,12 +96,12 @@ chrome.runtime.onMessage.addListener(
                         }
                         return site;
                     });
-                chrome.storage.sync.set({'blockedSites': sites.map(site => Site.toUrlString(site)).join(',')});
+                storage.set({'blockedSites': sites.map(site => Site.toUrlString(site)).join(',')});
                 sendResponse({sites: sites});
             });
             // Load settings
-        } else if (request.getSettings != null) {
-            chrome.storage.sync.get('siteblockSettings', (data) => {
+        } else if (request.settings != null) {
+            storage.get('siteblockSettings', (data) => {
                 if (data.siteblockSettings != null) {
                     settings = new Settings(data.siteblockSettings);
                     sendResponse({settings: settings});
@@ -98,7 +109,20 @@ chrome.runtime.onMessage.addListener(
             });
             // save Settings
         } else if (request.setting != null) {
-            chrome.storage.sync.set({'siteblockSettings': Settings.toConstructString(request.setting)});
+            if (request.setting.sync !== settings.sync) {
+                let sites = '';
+                storage.set({'siteblockSettings': null});
+                storage.get('blockedSites', (data => {
+                    if (data.blockedSites != null) {
+                        sites = data.blockedSites;
+                        storage.set({'blockedSites': null});
+                        storage = request.setting.sync ? chrome.storage.sync : chrome.storage.local;
+                        storage.set({'blockedSites': sites});
+                    }
+                }));
+                storage = request.setting.sync ? chrome.storage.sync : chrome.storage.local;
+            }
+            storage.set({'siteblockSettings': Settings.toConstructString(request.setting)});
             sendResponse(request.setting);
         } else {
             sendResponse({error: 'Unknown command'});
@@ -155,8 +179,13 @@ class Site {
 
 class Settings {
     darkMode = false;
+    sync = false;
 
-    constructor(constructString) {
+    constructor(constructString='') {
+        if (constructString.startsWith('^s')) {
+            this.sync = true;
+            constructString = constructString.substr(2);
+        }
         if (constructString.startsWith('^d')) {
             this.darkMode = true;
             constructString = constructString.substr(2);
@@ -167,6 +196,9 @@ class Settings {
         let str = '';
         if ( site.darkMode ) {
             str = '^d' + str;
+        }
+        if ( site.sync ) {
+            str = '^s' + str;
         }
         return str;
     }
